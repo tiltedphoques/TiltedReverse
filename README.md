@@ -1,3 +1,3 @@
-# Destroyer Of Worlds
+# Tilted Reverse
 
-This library is yet another attempt to get a decent networking library designed with games in mind.
+This library covers our reverse engineering needs for game clients
