@@ -108,6 +108,7 @@ workspace ("Tilted Reverse")
             includedirs
             {
                 "../Code/reverse/include/",
+                "../Libraries/TiltedCore/Code/core/include/",
             }
 
             files
