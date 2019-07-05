@@ -1,5 +1,8 @@
 require("premake", ">=5.0.0-alpha10")
 
+include "module.lua"
+include "../Libraries/TiltedCore/Build/module.lua"
+
 workspace ("Tilted Reverse")
 
     ------------------------------------------------------------------
@@ -26,7 +29,6 @@ workspace ("Tilted Reverse")
         "../Code/"
     }
 	
-    
     filter { "action:vs*"}
         buildoptions { "/wd4512", "/wd4996", "/wd4018", "/Zm500" }
         
@@ -43,6 +45,16 @@ workspace ("Tilted Reverse")
         defines { "DEBUG" }
         optimize ("Off")
         symbols ( "On" )
+        
+    filter { "architecture:*86" }
+        libdirs { "lib/x32" }
+        targetdir ("lib/x32")
+
+    filter { "architecture:*64" }
+        libdirs { "lib/x64" }
+        targetdir ("lib/x64")
+        
+    filter {}
 
     group ("Applications")
         project ("Tests")
@@ -78,50 +90,10 @@ workspace ("Tilted Reverse")
                 targetdir ("bin/x64")
 		
     group ("Libraries")   
-        project ("Core")
-            kind ("StaticLib")
-            language ("C++")
-
-            includedirs
-            {
-                "../Libraries/TiltedCore/Code/core/include/",
-            }
-
-            files
-            {
-                "../Libraries/TiltedCore/Code/core/include/**.h",
-                "../Libraries/TiltedCore/Code/core/src/**.cpp",
-            }
-
-            filter { "architecture:*86" }
-                libdirs { "lib/x32" }
-                targetdir ("lib/x32")
-
-            filter { "architecture:*64" }
-                libdirs { "lib/x64" }
-                targetdir ("lib/x64")
+        CreateReverseProject("..", "../Libraries/TiltedCore")
+        CreateCoreProject("../Libraries/TiltedCore")
     
-        project ("Reverse")
-            kind ("StaticLib")
-            language ("C++")
+     group("ThirdParty")
+        CreateDisasmProject("..")
+        CreateMhookProject("..")
 
-            includedirs
-            {
-                "../Code/reverse/include/",
-                "../Libraries/TiltedCore/Code/core/include/",
-            }
-
-            files
-            {
-                "../Code/reverse/include/**.h",
-                "../Code/reverse/src/**.cpp",
-            }
-
-            filter { "architecture:*86" }
-                libdirs { "lib/x32" }
-                targetdir ("lib/x32")
-
-            filter { "architecture:*64" }
-                libdirs { "lib/x64" }
-                targetdir ("lib/x64")
-    
