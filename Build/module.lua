@@ -58,3 +58,13 @@ function CreateMhookProject(basePath)
         }
 
 end
+
+function LazyReverseProjects(basePath, coreBasePath)
+    group ("Libraries")   
+        CreateReverseProject(basePath, coreBasePath)
+        CreateCoreProject(coreBasePath)
+    
+     group("ThirdParty")
+        CreateDisasmProject(basePath)
+        CreateMhookProject(basePath)
+end

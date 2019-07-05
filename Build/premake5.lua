@@ -89,11 +89,5 @@ workspace ("Tilted Reverse")
                 libdirs { "lib/x64" }
                 targetdir ("bin/x64")
 		
-    group ("Libraries")   
-        CreateReverseProject("..", "../Libraries/TiltedCore")
-        CreateCoreProject("../Libraries/TiltedCore")
-    
-     group("ThirdParty")
-        CreateDisasmProject("..")
-        CreateMhookProject("..")
+    LazyReverseProjects("..", "../Libraries/TiltedCore")
 
