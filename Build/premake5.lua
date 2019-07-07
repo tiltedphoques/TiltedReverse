@@ -14,7 +14,7 @@ workspace ("Tilted Reverse")
     location ("projects")
     startproject ("Tests")
     
-    staticruntime "On"
+    staticruntime "Off"
     floatingpoint "Fast"
     vectorextensions "SSE2"
     warnings "Extra"
@@ -61,7 +61,8 @@ workspace ("Tilted Reverse")
             kind ("ConsoleApp")
             language ("C++")
             
-			
+			entrypoint "WinMainCRTStartup"
+            
             includedirs
             {
                 "../Code/tests/include/",
@@ -79,15 +80,37 @@ workspace ("Tilted Reverse")
             {
                 "Core"
             }
-          
+            
+            dependson
+            {
+                "DLL"
+            }
+            
+        project ("DLL")
+            kind ("SharedLib")
+            language ("C++")
+            
 			
-            filter { "architecture:*86" }
-                libdirs { "lib/x32" }
-                targetdir ("bin/x32")
+            includedirs
+            {
+                "../Code/dll/include/",
+                "../Code/reverse/include/",
+                "../Libraries/TiltedCore/Code/core/include/",
+            }
 
-            filter { "architecture:*64" }
-                libdirs { "lib/x64" }
-                targetdir ("bin/x64")
+             files
+             {
+                "../Code/dll/include/**.h",
+                "../Code/dll/src/**.cpp",
+            }
+			
+            links
+            {
+                "Core",
+                "Reverse",
+                "mhook",
+                "disasm"
+            }
 		
     LazyReverseProjects("..", "../Libraries/TiltedCore")
 

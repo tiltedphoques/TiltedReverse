@@ -2,61 +2,25 @@
 
 #include <Platform.h>
 #include <memory>
+#include <functional>
 
 struct App;
-void RegisterApp(std::unique_ptr<App> aApp);
 
-#if TP_PLATFORM_64
-
-using TGetWinmain = void*(__stdcall*)();
-extern TGetWinmain OriginalGetWinmain;
-
-void* GetWinmainHook();
-
-#define DEFINE_DLL_ENTRY_INITIALIZER(className) \
-    BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)\
-{\
-switch (fdwReason)\
-{\
-case DLL_PROCESS_ATTACH:\
-{\
-    RegisterApp(std::make_unique<className>());\
-    OriginalGetWinmain = (TGetWinmain)GetProcAddress(GetModuleHandleA("api-ms-win-crt-runtime-l1-1-0.dll"), "_get_narrow_winmain_command_line");\
-    Mhook_SetHook((LPVOID*)&OriginalGetWinmain, GetWinmainHook);\
-    break;\
-}\
-case DLL_PROCESS_DETACH:\
-{\
-    break;\
-}\
-}\
-\
-return TRUE;\
+namespace details
+{
+    BOOL TiltedReverseMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved, std::function<std::unique_ptr<App>()> aAppFactory);
 }
 
-#else
+template<class T>
+BOOL CreateReverseApp(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
+{
+    static_assert(std::is_base_of_v<App, T>);
 
-using TGetStartupInfoA = void(__stdcall*)(LPSTARTUPINFO lpStartupInfo);
-extern TGetStartupInfoA OriginalGetStartupInfoA;
+    return details::TiltedReverseMain(hModule, fdwReason, lpReserved, []() { return std::make_unique<T>(); });
+}
 
 #define DEFINE_DLL_ENTRY_INITIALIZER(className) \
-    BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)\
-{\
-switch (fdwReason)\
-{\
-case DLL_PROCESS_ATTACH:\
-{\
-    RegisterApp(std::make_unique<className>());\
-    OriginalGetStartupInfoA = (GetStartupInfoA_t)GetProcAddress(GetModuleHandleA("kernel32.dll"), "GetStartupInfoA");\
-    Mhook_SetHook((LPVOID*)& OriginalGetStartupInfoA, HookedGetStartupInfoA);\
-    break;\
-}\
-case DLL_PROCESS_DETACH:\
-{\
-    break;\
-}\
-}\
-\
-return TRUE;\
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)                              \
+{                                                                                                       \
+    return CreateReverseApp<className>(hModule, fdwReason, lpReserved);                                 \
 }
-#endif
