@@ -2,6 +2,7 @@
 
 #include <list>
 #include <memory>
+#include <Stl.h>
 
 // These will run 
 struct FunctionHook
@@ -30,7 +31,7 @@ public:
 
 private:
 
-    std::list<std::unique_ptr<FunctionHook>> m_functionHooks;
+    List<std::unique_ptr<FunctionHook>> m_functionHooks;
 };
 
 template<class T>

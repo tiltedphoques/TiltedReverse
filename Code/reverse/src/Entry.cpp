@@ -10,6 +10,11 @@
 
 static std::unique_ptr<App> g_pApp;
 
+App& App::GetInstance()
+{
+    return *g_pApp;
+}
+
 using TWinMain = int(__stdcall)(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd);
 TWinMain* OriginalWinMain = nullptr;
 
@@ -18,8 +23,8 @@ static int __stdcall HookedWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     // Ensure exceptions won't cause our calls to be skipped
     struct ScopedCaller
     {
-        ScopedCaller() { g_pApp->BeginMain(); }
-        ~ScopedCaller() { g_pApp->EndMain(); }
+        ScopedCaller() { App::GetInstance().BeginMain(); }
+        ~ScopedCaller() { App::GetInstance().EndMain(); }
     };
 
     ScopedCaller appCaller;
@@ -29,7 +34,7 @@ static int __stdcall HookedWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 static void SetupMainHook()
 {
-    OriginalWinMain = (TWinMain*)g_pApp->GetMainAddress();
+    OriginalWinMain = (TWinMain*)App::GetInstance().GetMainAddress();
     if (OriginalWinMain == nullptr)
         return;
 
@@ -90,13 +95,13 @@ BOOL details::TiltedReverseMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReser
         }
 #endif
 
-        g_pApp->Attach();
+        App::GetInstance().Attach();
 
         break;                                                                                                                                              
     }                                                                                                                                                       
     case DLL_PROCESS_DETACH:                                                                                                                                
     {              
-        g_pApp->Detach();
+        App::GetInstance().Detach();
 
         break;                                                                                                                                              
     }                                                                                                                                                       

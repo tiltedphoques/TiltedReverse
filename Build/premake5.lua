@@ -78,7 +78,10 @@ workspace ("Tilted Reverse")
 			
             links
             {
-                "Core"
+                "Core",
+                "Reverse",
+                "mhook",
+                "disasm"
             }
             
             dependson

@@ -2,6 +2,8 @@
 
 #include <windows.h>
 #include <Platform.h>
+#include <AutoPtr.h>
+#include <AutoPtrManager.h>
 
 int __stdcall FakeWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
@@ -10,7 +12,7 @@ int __stdcall FakeWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lp
     return 0;
 }
 
-TEST_CASE("Load the reverse dll", "[reverse]")
+TEST_CASE("Load the reverse dll", "[reverse.app]")
 {
     SECTION("Load")
     {
@@ -38,5 +40,27 @@ TEST_CASE("Load the reverse dll", "[reverse]")
 #endif
 
         FakeWinMain(0, 0, 0, 0);
+    }
+}
+
+TEST_CASE("Reverse auto ptr", "[reverse.autoptr]")
+{
+    SECTION("Use auto ptr manager")
+    {
+        REQUIRE(AutoPtrManager::GetInstance().GetBaseAddress() != 0);
+    }
+
+    SECTION("Simple init with address")
+    {
+        AutoPtr<int> x(0x12345678);
+        int* ptr = x;
+        REQUIRE(ptr == (int*)(0x12345678 + AutoPtrManager::GetInstance().GetBaseAddress()));
+    }
+
+    SECTION("Init from pattern")
+    {
+        AutoPtr<int> val(Pattern({ 0x78, 0x56, 0x34, 0x12 }, 1, Pattern::Direct));
+        REQUIRE(val.Get() != nullptr);
+        REQUIRE(*val == 0x12345678);
     }
 }

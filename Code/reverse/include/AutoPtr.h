@@ -1,17 +1,36 @@
 #pragma once
 
-#include <cstdint>
+#include <Platform.h>
+#include <Pattern.h>
 
-struct AutoPtr
+struct BasicAutoPtr
 {
-public:
+    BasicAutoPtr(Pattern aPattern);
+    BasicAutoPtr(uintptr_t aAddress);
 
-#if TP_PLATFORM_64
-    AutoPtr() = default;
-#else
+    BasicAutoPtr() = delete;
+    BasicAutoPtr(BasicAutoPtr&) = delete;
+    BasicAutoPtr& operator=(BasicAutoPtr&) = delete;
+
+    void* GetPtr();
+
+private:
+
+    void* m_pPtr;
+};
+
+template<class T>
+struct AutoPtr : BasicAutoPtr
+{
+    AutoPtr(Pattern aPattren) : BasicAutoPtr(std::move(aPattren)) {}
+    AutoPtr(uintptr_t aAddress) : BasicAutoPtr(aAddress) {}
+
     AutoPtr() = delete;
-#endif
-
     AutoPtr(AutoPtr&) = delete;
     AutoPtr& operator=(AutoPtr&) = delete;
+
+    operator T* () { return Get(); }
+    T* operator->() { return Get(); }
+
+    T* Get() { return (T*)GetPtr(); }
 };

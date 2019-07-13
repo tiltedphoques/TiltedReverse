@@ -19,4 +19,16 @@ struct App
 
     // Called when the dll is detached
     virtual bool Detach() = 0;
+
+    void Start();
+
+    // Functions that can be called by class users
+    bool IsReady() const;
+
+
+    static App& GetInstance();
+
+private:
+
+    bool m_ready;
 };
