@@ -1,7 +1,7 @@
 require("premake", ">=5.0.0-alpha10")
 
 include "module.lua"
-include "../Libraries/TiltedCore/Build/module.lua"
+include "../../TiltedCore/Build/module.lua"
 
 workspace ("Tilted Reverse")
 
@@ -67,7 +67,7 @@ workspace ("Tilted Reverse")
             {
                 "../Code/tests/include/",
                 "../Code/reverse/include/",
-                "../Libraries/TiltedCore/Code/core/include/",
+                "../../TiltedCore/Code/core/include/",
             }
 
              files
@@ -98,7 +98,7 @@ workspace ("Tilted Reverse")
             {
                 "../Code/dll/include/",
                 "../Code/reverse/include/",
-                "../Libraries/TiltedCore/Code/core/include/",
+                "../../TiltedCore/Code/core/include/",
             }
 
              files
@@ -115,5 +115,5 @@ workspace ("Tilted Reverse")
                 "disasm"
             }
 		
-    LazyReverseProjects("..", "../Libraries/TiltedCore")
+    LazyReverseProjects("..", "../../TiltedCore")
 
