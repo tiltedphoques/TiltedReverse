@@ -25,7 +25,7 @@ constexpr auto s_gameIdKey = "GameId32";
 constexpr auto s_gameExeKey = "GamePath32";
 #endif
 
-bool ExecuteFunctionInProcess(HANDLE aProcessHandle, const std::wstring& acModuleName, const std::string& acFunctionName, const std::string& acParameter)
+bool ExecuteFunctionInProcess(HANDLE aProcessHandle, const std::wstring& acModuleName, const std::string& acFunctionName, const std::wstring& acParameter)
 {
     auto showErrorMessage = [&aProcessHandle](auto&& ... args)
     {
@@ -35,7 +35,7 @@ bool ExecuteFunctionInProcess(HANDLE aProcessHandle, const std::wstring& acModul
         messageBox.Show();
     };
 
-    auto bytesToWrite = (acParameter.size() + 1) * sizeof(char);
+    auto bytesToWrite = (acParameter.size() + 1) * sizeof(std::wstring::value_type);
 
     auto pBaseAddress = VirtualAllocEx(aProcessHandle, nullptr, bytesToWrite, MEM_COMMIT, PAGE_READWRITE);
     if (!pBaseAddress)
@@ -154,7 +154,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
     uint32_t exitCode = EXIT_FAILURE;
 
     // Inject our DLL.
-    if (ExecuteFunctionInProcess(processInfo.hProcess, L"kernel32.dll", "LoadLibraryA", dllPath.string()))
+    if (ExecuteFunctionInProcess(processInfo.hProcess, L"kernel32.dll", "LoadLibraryW", dllPath.wstring()))
     {
         // Resume the game's process.
         ResumeThread(processInfo.hThread);
