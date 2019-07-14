@@ -174,6 +174,4 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
     CloseHandle(processInfo.hThread);
 
     return exitCode;
-
-    return 0;
 }
