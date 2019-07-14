@@ -15,6 +15,30 @@ function CreateReverseProject(basePath, coreBasePath)
             basePath .. "/Code/reverse/src/**.cpp",
         }
 end
+
+function CreateLoaderProject(basePath, coreBasePath)
+    project ("Loader")
+        kind ("WindowedApp")
+        language ("C++")
+
+        includedirs
+        {
+            basePath .. "/Code/reverse/include/",
+            basePath .. "/Code/loader/include/",
+            coreBasePath .. "/Code/core/include/",
+        }
+
+        files
+        {
+            basePath .. "/Code/loader/include/**.h",
+            basePath .. "/Code/loader/src/**.cpp",
+        }
+        
+        links
+        {
+            "Core"
+        }
+end
     
 function CreateDisasmProject(basePath)
     project "disasm"
@@ -60,6 +84,9 @@ function CreateMhookProject(basePath)
 end
 
 function LazyReverseProjects(basePath, coreBasePath)
+    group ("Applications")
+        CreateLoaderProject(basePath, coreBasePath)
+
     group ("Libraries")   
         CreateReverseProject(basePath, coreBasePath)
         CreateCoreProject(coreBasePath)
