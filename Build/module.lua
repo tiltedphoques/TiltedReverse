@@ -8,6 +8,7 @@ function CreateReverseProject(basePath, coreBasePath)
             basePath .. "/Code/reverse/include/",
             coreBasePath .. "/Code/core/include/",
             basePath .. "/ThirdParty/mhook/",
+            basePath .. "/ThirdParty/",
             basePath .. "/ThirdParty/disasm/",
         }
 
