@@ -22,10 +22,10 @@ bool SteamLauncher::IsRunning() const
     return Registry::Read<uint32_t>(Registry::Key::CurrentUser, L"SOFTWARE", L"Valve", L"Steam", L"ActiveProcess", L"ActiveUser") > 0;
 }
 
-void SteamLauncher::Launch()
+void SteamLauncher::Launch() const
 {
-    std::filesystem::path installPath = Registry::Read<std::wstring>(Registry::Key::CurrentUser, L"SOFTWARE", L"Valve", L"Steam", L"SteamPath");
-    std::filesystem::path exePath = Registry::Read<std::wstring>(Registry::Key::CurrentUser, L"SOFTWARE", L"Valve", L"Steam", L"SteamExe");
+    const std::filesystem::path installPath = Registry::Read<std::wstring>(Registry::Key::CurrentUser, L"SOFTWARE", L"Valve", L"Steam", L"SteamPath");
+    const std::filesystem::path exePath = Registry::Read<std::wstring>(Registry::Key::CurrentUser, L"SOFTWARE", L"Valve", L"Steam", L"SteamExe");
 
     STARTUPINFO startupInfo = { 0 };
     PROCESS_INFORMATION processInfo = { 0 };

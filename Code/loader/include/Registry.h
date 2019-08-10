@@ -15,13 +15,15 @@ namespace Registry
     };
 
     template<typename T, typename... Args>
-    const std::enable_if_t<!std::conjunction_v<std::is_constructible<std::wstring, Args>...>, T> Read(Key, Args&&...)
+    std::enable_if_t<!std::conjunction_v<std::is_constructible<std::wstring, Args>...>, T> Read(Key, Args&&...)
     {
         static_assert(false, "Not all arguments are wide strings");
+        return {};
     }
 
     template<typename T, typename... Args>
-    const std::enable_if_t<(std::is_integral_v<T> || std::is_same_v<T, std::wstring>) && std::conjunction_v<std::is_constructible<std::wstring, Args>...>, T> Read(Key aKey, Args&&... aKeys)
+    std::enable_if_t<(std::is_integral_v<T> || std::is_same_v<T, std::wstring>) && std::conjunction_v<std::is_constructible<std::wstring, Args>...>, T>
+    Read(const Key aKey, Args&&... aKeys)
     {
         T result = T();
         uint32_t resultSize;

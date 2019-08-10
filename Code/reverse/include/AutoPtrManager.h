@@ -6,11 +6,13 @@
 
 struct AutoPtrManager
 {
-    AutoPtrManager();
-    ~AutoPtrManager();
+    AutoPtrManager(const AutoPtrManager&) = delete;
+    AutoPtrManager(AutoPtrManager&&) = delete;
+    AutoPtrManager& operator=(const AutoPtrManager&) = delete;
+    AutoPtrManager& operator=(AutoPtrManager&&) = delete;
 
-    uintptr_t GetBaseAddress() const;
-    void* Find(Pattern aPattern);
+    [[nodiscard]] uintptr_t GetBaseAddress() const;
+    void* Find(Pattern aPattern) const;
 
     static AutoPtrManager& GetInstance()
     {
@@ -18,6 +20,9 @@ struct AutoPtrManager
     }
 
 private:
+
+    AutoPtrManager();
+    ~AutoPtrManager();
 
     uintptr_t m_baseAddress;
     uintptr_t m_textStartAddress;

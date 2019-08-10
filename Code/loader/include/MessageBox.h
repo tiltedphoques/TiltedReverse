@@ -32,7 +32,7 @@ public:
     void SetTitleSuffix(const std::wstring& aSuffix);
     void ModType(uint32_t aType);
 
-    void Show();
+    void Show() const;
 
 private:
 
@@ -47,5 +47,5 @@ class ErrorMessageBox : public MessageBox
 public:
 
     ErrorMessageBox();
-    ErrorMessageBox(uint32_t aErrorCode);
+    explicit ErrorMessageBox(uint32_t aErrorCode);
 };

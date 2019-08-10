@@ -5,21 +5,22 @@
 #include <windows.h>
 #include <Hash.h>
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
 
 AutoPtrManager AutoPtrManager::s_instance;
 
 AutoPtrManager::AutoPtrManager()
-    : m_baseAddress(0)
+    : m_baseAddress(0), m_textStartAddress(0), m_textSize(0)
 {
     m_baseAddress = reinterpret_cast<uintptr_t>(GetModuleHandle(NULL));
 
-    auto NTHeaders = reinterpret_cast<PIMAGE_NT_HEADERS>(m_baseAddress + static_cast<uintptr_t>(reinterpret_cast<PIMAGE_DOS_HEADER>(m_baseAddress)->e_lfanew));
+    const auto ntHeaders = reinterpret_cast<PIMAGE_NT_HEADERS>(m_baseAddress + static_cast<uintptr_t>(reinterpret_cast<
+        PIMAGE_DOS_HEADER>(m_baseAddress)->e_lfanew));
 
-    auto pSection = reinterpret_cast<const IMAGE_SECTION_HEADER*>(NTHeaders + 1);
-    for (auto i = 0; i < NTHeaders->FileHeader.NumberOfSections; ++i, ++pSection)
+    auto pSection = reinterpret_cast<const IMAGE_SECTION_HEADER*>(ntHeaders + 1);
+    for (auto i = 0; i < ntHeaders->FileHeader.NumberOfSections; ++i, ++pSection)
     {
-        if (strcmp((const char*)pSection->Name, ".text") == 0)
+        if (strcmp(reinterpret_cast<const char*>(pSection->Name), ".text") == 0)
         {
             m_textStartAddress = m_baseAddress + pSection->VirtualAddress;
             m_textSize = pSection->SizeOfRawData;
@@ -30,22 +31,19 @@ AutoPtrManager::AutoPtrManager()
     m_textHash = FHash::Crc64(reinterpret_cast<const unsigned char*>(m_textStartAddress), m_textSize);
 }
 
-AutoPtrManager::~AutoPtrManager()
-{
-
-}
+AutoPtrManager::~AutoPtrManager() = default;
 
 uintptr_t AutoPtrManager::GetBaseAddress() const
 {
     return m_baseAddress;
 }
 
-void* AutoPtrManager::Find(Pattern aPattern)
+void* AutoPtrManager::Find(Pattern aPattern) const
 {
-    const uint8_t* cstart = (const uint8_t*)m_textStartAddress;
-    const uint8_t* cend = cstart + m_textSize;
+    const auto* cstart = reinterpret_cast<const uint8_t*>(m_textStartAddress);
+    const auto cend = cstart + m_textSize;
 
-    auto cmpOp = [](uint8_t a, uint8_t b)
+    const auto cmpOp = [](uint8_t a, uint8_t b)
     {
         return (a == b || b == 0xCC);
     };
@@ -53,15 +51,15 @@ void* AutoPtrManager::Find(Pattern aPattern)
     size_t i = 0;
     while (true)
     {
-        auto res = std::search(cstart, cend, aPattern.BytePattern.begin(), aPattern.BytePattern.end(), cmpOp);
+        const auto res = std::search(cstart, cend, aPattern.BytePattern.begin(), aPattern.BytePattern.end(), cmpOp);
         if (res >= cend)
             break;
 
         if (aPattern.Index == i)
         {
-            if (aPattern.Type == Pattern::RelativeIndirection4)
+            if (aPattern.Type == Pattern::kRelativeIndirection4)
             {
-                auto address = res + aPattern.Offset;
+                const auto address = res + aPattern.Offset;
                 return (void*)(address + *reinterpret_cast<const int32_t*>(address) + 4);
             }
             return (void*)(res + aPattern.Offset);

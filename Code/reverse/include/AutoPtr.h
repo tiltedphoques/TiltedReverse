@@ -12,7 +12,7 @@ struct BasicAutoPtr
     BasicAutoPtr(BasicAutoPtr&) = delete;
     BasicAutoPtr& operator=(BasicAutoPtr&) = delete;
 
-    void* GetPtr();
+    void* GetPtr() const;
 
 private:
 
@@ -23,7 +23,7 @@ template<class T>
 struct AutoPtr : BasicAutoPtr
 {
     AutoPtr(Pattern aPattren) : BasicAutoPtr(std::move(aPattren)) {}
-    AutoPtr(uintptr_t aAddress) : BasicAutoPtr(aAddress) {}
+    AutoPtr(const uintptr_t aAddress) : BasicAutoPtr(aAddress) {}
 
     AutoPtr() = delete;
     AutoPtr(AutoPtr&) = delete;
@@ -32,5 +32,5 @@ struct AutoPtr : BasicAutoPtr
     operator T* () { return Get(); }
     T* operator->() { return Get(); }
 
-    T* Get() { return (T*)GetPtr(); }
+    T* Get() { return static_cast<T*>(GetPtr()); }
 };

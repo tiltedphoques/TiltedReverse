@@ -9,7 +9,7 @@ struct Config
     Config(const std::string& acFileName);
     ~Config() = default;
 
-    const std::string& Get(const std::string& acKey) const;
+    [[nodiscard]] const std::string& Get(const std::string& acKey) const;
 
 private:
 

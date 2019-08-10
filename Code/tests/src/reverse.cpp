@@ -17,15 +17,15 @@ TEST_CASE("Load the reverse dll", "[reverse.app]")
     SECTION("Load")
     {
 #if TP_RELEASE
-        auto handle = LoadLibraryA("DLL_r.dll");
+        const auto handle = LoadLibraryA("DLL_r.dll");
 #else
-        auto handle = LoadLibraryA("DLL.dll");
+        const auto handle = LoadLibraryA("DLL.dll");
 #endif
-        
-        auto pSetParams = GetProcAddress(handle, "SetParams");
+
+        const auto pSetParams = GetProcAddress(handle, "SetParams");
 
         using TSetParams = void(*)(void*);
-        auto callableSetParams = (TSetParams)pSetParams;
+        const auto callableSetParams = reinterpret_cast<TSetParams>(pSetParams);
 
         callableSetParams(&FakeWinMain);
 
@@ -59,7 +59,7 @@ TEST_CASE("Reverse auto ptr", "[reverse.autoptr]")
 
     SECTION("Init from pattern")
     {
-        AutoPtr<int> val(Pattern({ 0x78, 0x56, 0x34, 0x12 }, 1, Pattern::Direct));
+        AutoPtr<int> val(Pattern({ 0x78, 0x56, 0x34, 0x12 }, 1, Pattern::kDirect));
         REQUIRE(val.Get() != nullptr);
         REQUIRE(*val == 0x12345678);
     }

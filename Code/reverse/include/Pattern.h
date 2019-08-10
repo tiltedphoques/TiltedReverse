@@ -6,8 +6,8 @@ struct Pattern
 {
     enum EType
     {
-        RelativeIndirection4,
-        Direct
+        kRelativeIndirection4,
+        kDirect
     };
 
     Pattern(Vector<uint8_t> aBytePattern, size_t aExpected, EType aPatternType, intptr_t aOffset = 0, size_t aIndex = 0);

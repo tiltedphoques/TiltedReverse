@@ -1,9 +1,7 @@
 #include <AutoPtr.h>
 #include <AutoPtrManager.h>
 
-#include <App.h>
-
-#include <assert.h>
+#include <cassert>
 
 BasicAutoPtr::BasicAutoPtr(Pattern aPattern)
 {
@@ -17,10 +15,10 @@ BasicAutoPtr::BasicAutoPtr(Pattern aPattern)
 
 BasicAutoPtr::BasicAutoPtr(uintptr_t aAddress)
 {
-    m_pPtr = (void*)(aAddress + AutoPtrManager::GetInstance().GetBaseAddress());
+    m_pPtr = reinterpret_cast<void*>(aAddress + AutoPtrManager::GetInstance().GetBaseAddress());
 }
 
-void* BasicAutoPtr::GetPtr()
+void* BasicAutoPtr::GetPtr() const
 {
     return m_pPtr;
 }

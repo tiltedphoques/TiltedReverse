@@ -6,7 +6,7 @@ struct App
     virtual ~App();
 
     // Retrieve the program's main address, if null is returned the main function will not be hooked
-    virtual void* GetMainAddress() const = 0;
+    [[nodiscard]] virtual void* GetMainAddress() const = 0;
 
     // Called right before the program's main function is called
     virtual bool BeginMain() = 0;
@@ -23,7 +23,7 @@ struct App
     void Start();
 
     // Functions that can be called by class users
-    bool IsReady() const;
+    [[nodiscard]] bool IsReady() const;
 
 
     static App& GetInstance();

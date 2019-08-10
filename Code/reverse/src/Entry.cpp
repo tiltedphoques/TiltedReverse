@@ -34,11 +34,11 @@ static int __stdcall HookedWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 static void SetupMainHook()
 {
-    OriginalWinMain = (TWinMain*)App::GetInstance().GetMainAddress();
+    OriginalWinMain = static_cast<TWinMain*>(App::GetInstance().GetMainAddress());
     if (OriginalWinMain == nullptr)
         return;
 
-    Mhook_SetHook((PVOID*)&OriginalWinMain, &HookedWinMain);
+    Mhook_SetHook(reinterpret_cast<PVOID*>(&OriginalWinMain), &HookedWinMain);
 }
 
 #if TP_PLATFORM_64
@@ -87,11 +87,11 @@ BOOL details::TiltedReverseMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReser
             Mhook_SetHook((LPVOID*)& OriginalGetWinmain, GetWinmainHook);
         }
 #else
-        auto hmod = LoadLibraryA("kernel32.dll");
-        if (hmod != 0)
+        const auto hmod = LoadLibraryA("kernel32.dll");
+        if (hmod != nullptr)
         {
-            OriginalGetStartupInfoA = (TGetStartupInfoA)GetProcAddress(hmod, "GetStartupInfoA");
-            Mhook_SetHook((LPVOID*)& OriginalGetStartupInfoA, HookedGetStartupInfoA);
+            OriginalGetStartupInfoA = reinterpret_cast<TGetStartupInfoA>(GetProcAddress(hmod, "GetStartupInfoA"));
+            Mhook_SetHook(reinterpret_cast<LPVOID*>(& OriginalGetStartupInfoA), HookedGetStartupInfoA);
         }
 #endif
 
@@ -104,7 +104,8 @@ BOOL details::TiltedReverseMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReser
         App::GetInstance().Detach();
 
         break;                                                                                                                                              
-    }                                                                                                                                                       
+    }
+    default: break;
     }                                                                                                                                                       
         
     return TRUE;

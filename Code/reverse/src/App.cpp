@@ -5,9 +5,7 @@ App::App()
 {
 }
 
-App::~App()
-{
-}
+App::~App() = default;
 
 void App::Start()
 {

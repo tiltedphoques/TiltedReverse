@@ -27,7 +27,7 @@ constexpr auto s_gameExeKey = "GamePath32";
 
 bool ExecuteFunctionInProcess(HANDLE aProcessHandle, const std::wstring& acModuleName, const std::string& acFunctionName, const std::wstring& acParameter)
 {
-    auto showErrorMessage = [&aProcessHandle](auto&& ... args)
+    const auto showErrorMessage = [&aProcessHandle](auto&& ... args)
     {
         ErrorMessageBox messageBox;
         ((messageBox << args), ...);
@@ -37,7 +37,7 @@ bool ExecuteFunctionInProcess(HANDLE aProcessHandle, const std::wstring& acModul
 
     auto bytesToWrite = (acParameter.size() + 1) * sizeof(std::wstring::value_type);
 
-    auto pBaseAddress = VirtualAllocEx(aProcessHandle, nullptr, bytesToWrite, MEM_COMMIT, PAGE_READWRITE);
+    const auto pBaseAddress = VirtualAllocEx(aProcessHandle, nullptr, bytesToWrite, MEM_COMMIT, PAGE_READWRITE);
     if (!pBaseAddress)
     {
         showErrorMessage(L"Couldn't allocate ", bytesToWrite, L" bytes in the process.");
@@ -51,18 +51,18 @@ bool ExecuteFunctionInProcess(HANDLE aProcessHandle, const std::wstring& acModul
         return false;
     }
 
-    auto moduleHandle = GetModuleHandle(acModuleName.c_str());
+    const auto moduleHandle = GetModuleHandle(acModuleName.c_str());
     if (!moduleHandle)
     {
         showErrorMessage(L"Couldn't find module ", std::quoted(acModuleName), L".");
         return false;
     }
 
-    auto funcAddress = GetProcAddress(moduleHandle, acFunctionName.c_str());
+    const auto funcAddress = GetProcAddress(moduleHandle, acFunctionName.c_str());
     if (!funcAddress)
     {
         size_t charConverted;
-        auto message = acFunctionName;
+        const auto message = acFunctionName;
 
         std::vector<wchar_t> pConvertedString(message.size() + 1);
         mbstowcs_s(&charConverted, pConvertedString.data(), pConvertedString.size(), message.c_str(), message.size());
@@ -71,7 +71,7 @@ bool ExecuteFunctionInProcess(HANDLE aProcessHandle, const std::wstring& acModul
         return false;
     }
 
-    auto thread = CreateRemoteThread(aProcessHandle, nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(funcAddress), pBaseAddress, 0, nullptr);
+    const auto thread = CreateRemoteThread(aProcessHandle, nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(funcAddress), pBaseAddress, 0, nullptr);
     if (!thread)
     {
         showErrorMessage(L"Couldn't create a thread in the process.");
@@ -91,14 +91,14 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
     TP_UNUSED(hPrevInstance);
     TP_UNUSED(nCmdShow);
 
-    bool skipSteamCheck = false;
+    auto skipSteamCheck = false;
     wchar_t** argList;
     int argCount;
 
     argList = CommandLineToArgvW(GetCommandLine(), &argCount);
     if (argList != nullptr)
     {
-        for (int i = 0; i < argCount; i++)
+        for (auto i = 0; i < argCount; i++)
         {
             std::wstring_view arg = argList[i];
             if (arg == L"--skip-steam")

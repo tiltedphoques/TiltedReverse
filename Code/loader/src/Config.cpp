@@ -9,11 +9,11 @@ Config::Config(const std::string& acFileName)
     {
         for (std::string line; std::getline(file, line); )
         {
-            auto pos = line.find('=');
+            const auto pos = line.find('=');
             auto key = line.substr(0, pos);
             auto value = line.substr(pos + 1);
 
-            if (key.size() > 0 && value.size() > 0)
+            if (!key.empty() && !value.empty())
             {
                 m_keyValueMap[key] = value;
             }
@@ -24,9 +24,9 @@ Config::Config(const std::string& acFileName)
 
 const std::string& Config::Get(const std::string& acKey) const
 {
-    static std::string s_result = "";
+    static std::string s_result;
 
-    auto it = m_keyValueMap.find(acKey);
+    const auto it = m_keyValueMap.find(acKey);
     if (it != std::end(m_keyValueMap))
     {
         return it->second;

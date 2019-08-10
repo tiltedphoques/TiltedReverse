@@ -7,5 +7,5 @@ struct SteamLauncher
 protected:
 
     bool IsRunning() const;
-    void Launch();
+    void Launch() const;
 };

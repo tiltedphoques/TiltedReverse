@@ -18,7 +18,7 @@ void MessageBox::ModType(uint32_t aType)
     m_type |= aType;
 }
 
-void MessageBox::Show()
+void MessageBox::Show() const
 {
     std::wstring title = L"Tilted Phoques";
     if (!m_titleSuffix.empty())
@@ -34,7 +34,7 @@ ErrorMessageBox::ErrorMessageBox()
 {
 }
 
-ErrorMessageBox::ErrorMessageBox(uint32_t aErrorCode)
+ErrorMessageBox::ErrorMessageBox(const uint32_t aErrorCode)
     : MessageBox()
 {
     SetTitleSuffix(L"(code " + std::to_wstring(aErrorCode) + L")");
