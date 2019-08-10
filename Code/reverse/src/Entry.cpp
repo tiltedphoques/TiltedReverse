@@ -7,6 +7,7 @@
 #include <mutex>
 
 #include <mhook/mhook.h>
+#include <Platform.h>
 
 static std::unique_ptr<App> g_pApp;
 
