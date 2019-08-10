@@ -11,27 +11,32 @@ struct TestApp : App
     TestApp() {};
     virtual ~TestApp() {};
 
-    virtual void* GetMainAddress() const override
+    void* GetMainAddress() const override
     {
         return g_pMainAddress;
     }
 
-    virtual bool BeginMain() override
+    void Update() override
+    {
+        
+    }
+
+    bool BeginMain() override
     {
         return true;
     }
 
-    virtual bool EndMain() override
+    bool EndMain() override
     {
         return true;
     }
 
-    virtual bool Attach() override
+    bool Attach() override
     {
         return true;
     }
 
-    virtual bool Detach() override
+    bool Detach() override
     {
         return true;
     }

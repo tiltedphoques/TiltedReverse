@@ -20,6 +20,9 @@ struct App
     // Called when the dll is detached
     virtual bool Detach() = 0;
 
+    // Must be called once per frame
+    virtual void Update() = 0;
+
     void Start();
 
     // Functions that can be called by class users
