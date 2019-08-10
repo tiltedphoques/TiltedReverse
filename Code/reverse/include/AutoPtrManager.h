@@ -1,6 +1,5 @@
 #pragma once
 
-#include <Stl.h>
 #include <Pattern.h>
 #include <mutex>
 
@@ -12,7 +11,7 @@ struct AutoPtrManager
     AutoPtrManager& operator=(AutoPtrManager&&) = delete;
 
     [[nodiscard]] uintptr_t GetBaseAddress() const;
-    void* Find(Pattern aPattern) const;
+    [[nodiscard]] void* Find(Pattern aPattern) const;
 
     static AutoPtrManager& GetInstance()
     {
