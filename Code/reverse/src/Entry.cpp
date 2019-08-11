@@ -93,14 +93,14 @@ BOOL details::TiltedReverseMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReser
         if (hmod != 0)
         {
             OriginalGetWinmain = (TGetWinmain)GetProcAddress(hmod, "_get_narrow_winmain_command_line");
-            FunctionHookManager::GetInstance().Add(&OriginalGetWinmain, GetWinmainHook);
+            TP_HOOK_IMMEDIATE(&OriginalGetWinmain, GetWinmainHook);
         }
 #else
         const auto hmod = LoadLibraryA("kernel32.dll");
         if (hmod != nullptr)
         {
             OriginalGetStartupInfoA = reinterpret_cast<TGetStartupInfoA>(GetProcAddress(hmod, "GetStartupInfoA"));
-            FunctionHookManager::GetInstance().Add(&OriginalGetStartupInfoA, HookedGetStartupInfoA);
+            TP_HOOK_IMMEDIATE(&OriginalGetStartupInfoA, HookedGetStartupInfoA);
         }
 #endif
 
