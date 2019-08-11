@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Stl.h>
+#include <Windows.h>
 
 struct FunctionHook
 {
@@ -41,6 +42,21 @@ public:
         Add(FunctionHook(reinterpret_cast<void**>(aSystemFunction), reinterpret_cast<void*>(aHookFunction)), aDelayed);
     }
 
+    template<class T>
+    void* AddSystem(const std::string& acLibraryName, const std::string& acFunctionName, T* apFunction, bool aDelayed = false)
+    {
+        const auto module = LoadLibraryA(acLibraryName.c_str());
+        if (module != nullptr)
+        {
+            auto pSystemFunction = reinterpret_cast<void*>(GetProcAddress(module, acFunctionName.c_str()));
+            Add(&pSystemFunction, apFunction, aDelayed);
+
+            return pSystemFunction;
+        }
+
+        return nullptr;
+    }
+
     static FunctionHookManager& GetInstance()
     {
         static FunctionHookManager s_instance;
@@ -58,6 +74,9 @@ private:
 
 #define TP_HOOK(systemFunction, hookFunction) FunctionHookManager::GetInstance().Add(systemFunction, hookFunction, true)
 #define TP_HOOK_IMMEDIATE(systemFunction, hookFunction) FunctionHookManager::GetInstance().Add(systemFunction, hookFunction, false)
+
+#define TP_HOOK_SYSTEM(libraryName, functionName, hookFunction) FunctionHookManager::GetInstance().AddSystem(libraryName, functionName, hookFunction, true)
+#define TP_HOOK_SYSTEM_IMMEDIATE(libraryName, functionName, hookFunction) FunctionHookManager::GetInstance().AddSystem(libraryName, functionName, hookFunction, false)
 
 #define TP_EMPTY_HOOK_PLACEHOLDER \
 __nop(); \

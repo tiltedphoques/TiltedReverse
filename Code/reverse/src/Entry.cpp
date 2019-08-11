@@ -55,7 +55,7 @@ static void SetupMainHook()
 using TGetWinmain = char* (__stdcall*)();
 TGetWinmain OriginalGetWinmain = nullptr;
 
-char* GetWinmainHook()
+char* HookGetWinmain()
 {
     static std::once_flag s_flag;
     std::call_once(s_flag, SetupMainHook);
@@ -78,7 +78,7 @@ void __stdcall HookedGetStartupInfoA(LPSTARTUPINFO lpStartupInfo)
 
 #endif
 
-BOOL details::TiltedReverseMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved, std::function<std::unique_ptr<App>()> aAppFactory)
+BOOL details::TiltedReverseMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved, const std::function<std::unique_ptr<App>()>& aAppFactory)
 {
     TP_UNUSED(hModule);
     TP_UNUSED(lpReserved);
@@ -89,19 +89,9 @@ BOOL details::TiltedReverseMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReser
     {                                     
         g_pApp = aAppFactory();
 #if TP_PLATFORM_64
-        auto hmod = LoadLibraryA("api-ms-win-crt-runtime-l1-1-0.dll");
-        if (hmod != 0)
-        {
-            OriginalGetWinmain = (TGetWinmain)GetProcAddress(hmod, "_get_narrow_winmain_command_line");
-            TP_HOOK(&OriginalGetWinmain, GetWinmainHook);
-        }
+        OriginalGetStartupInfoA = reinterpret_cast<TGetWinmain>(TP_HOOK_SYSTEM("api-ms-win-crt-runtime-l1-1-0.dll", "_get_narrow_winmain_command_line", HookGetWinmain));
 #else
-        const auto hmod = LoadLibraryA("kernel32.dll");
-        if (hmod != nullptr)
-        {
-            OriginalGetStartupInfoA = reinterpret_cast<TGetStartupInfoA>(GetProcAddress(hmod, "GetStartupInfoA"));
-            TP_HOOK(&OriginalGetStartupInfoA, HookedGetStartupInfoA);
-        }
+        OriginalGetStartupInfoA = reinterpret_cast<TGetStartupInfoA>(TP_HOOK_SYSTEM("kernel32.dll", "GetStartupInfoA", HookedGetStartupInfoA));
 #endif
 
         App::GetInstance().Attach();

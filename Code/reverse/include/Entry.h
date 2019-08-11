@@ -7,7 +7,7 @@ struct App;
 
 namespace details
 {
-    BOOL TiltedReverseMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved, std::function<std::unique_ptr<App>()> aAppFactory);
+    BOOL TiltedReverseMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved, const std::function<std::unique_ptr<App>()>& aAppFactory);
 }
 
 template<class T>
