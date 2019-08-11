@@ -42,3 +42,18 @@ struct FunctionHookInstaller
         FunctionHookManager::GetInstance().Add(std::make_unique<T>());
     }
 };
+
+#define TP_EMPTY_HOOK_PLACEHOLDER \
+__nop(); \
+__nop(); \
+__nop(); \
+__nop(); \
+__nop(); \
+__nop(); \
+__nop(); \
+__nop(); \
+__nop(); \
+__nop(); \
+__nop(); \
+__nop();
+__nop(); \
