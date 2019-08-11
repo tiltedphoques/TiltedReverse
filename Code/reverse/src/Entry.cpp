@@ -89,7 +89,7 @@ BOOL details::TiltedReverseMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReser
     {                                     
         g_pApp = aAppFactory();
 #if TP_PLATFORM_64
-        OriginalGetStartupInfoA = reinterpret_cast<TGetWinmain>(TP_HOOK_SYSTEM("api-ms-win-crt-runtime-l1-1-0.dll", "_get_narrow_winmain_command_line", HookGetWinmain));
+        OriginalGetWinmain = reinterpret_cast<TGetWinmain>(TP_HOOK_SYSTEM("api-ms-win-crt-runtime-l1-1-0.dll", "_get_narrow_winmain_command_line", HookGetWinmain));
 #else
         OriginalGetStartupInfoA = reinterpret_cast<TGetStartupInfoA>(TP_HOOK_SYSTEM("kernel32.dll", "GetStartupInfoA", HookedGetStartupInfoA));
 #endif
