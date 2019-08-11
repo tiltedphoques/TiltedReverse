@@ -8,6 +8,7 @@
 
 #include <mhook/mhook.h>
 #include <Platform.h>
+#include "FunctionHook.h"
 
 static std::unique_ptr<App> g_pApp;
 
@@ -24,8 +25,15 @@ static int __stdcall HookedWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     // Ensure exceptions won't cause our calls to be skipped
     struct ScopedCaller
     {
-        ScopedCaller() { App::GetInstance().BeginMain(); }
-        ~ScopedCaller() { App::GetInstance().EndMain(); }
+        ScopedCaller()
+        {
+            App::GetInstance().BeginMain();
+            FunctionHookManager::GetInstance().InstallDelayedHooks();
+        }
+        ~ScopedCaller()
+        {
+            App::GetInstance().EndMain();
+        }
     };
 
     ScopedCaller appCaller;
@@ -85,14 +93,14 @@ BOOL details::TiltedReverseMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReser
         if (hmod != 0)
         {
             OriginalGetWinmain = (TGetWinmain)GetProcAddress(hmod, "_get_narrow_winmain_command_line");
-            Mhook_SetHook((LPVOID*)& OriginalGetWinmain, GetWinmainHook);
+            FunctionHookManager::GetInstance().Add(&OriginalGetWinmain, GetWinmainHook);
         }
 #else
         const auto hmod = LoadLibraryA("kernel32.dll");
         if (hmod != nullptr)
         {
             OriginalGetStartupInfoA = reinterpret_cast<TGetStartupInfoA>(GetProcAddress(hmod, "GetStartupInfoA"));
-            Mhook_SetHook(reinterpret_cast<LPVOID*>(& OriginalGetStartupInfoA), HookedGetStartupInfoA);
+            FunctionHookManager::GetInstance().Add(&OriginalGetStartupInfoA, HookedGetStartupInfoA);
         }
 #endif
 
