@@ -56,6 +56,9 @@ private:
     Vector<FunctionHook> m_installedHooks;
 };
 
+#define TP_HOOK(systemFunction, hookFunction) FunctionHookManager::GetInstance().Add(systemFunction, hookFunction, true)
+#define TP_HOOK_IMMEDIATE(systemFunction, hookFunction) FunctionHookManager::GetInstance().Add(systemFunction, hookFunction, false)
+
 #define TP_EMPTY_HOOK_PLACEHOLDER \
 __nop(); \
 __nop(); \
