@@ -43,13 +43,13 @@ public:
     }
 
     template<class T>
-    void* AddSystem(const std::string& acLibraryName, const std::string& acFunctionName, T* apFunction, bool aDelayed = false)
+    void* AddSystem(const std::string& acLibraryName, const std::string& acFunctionName, T* apFunction)
     {
         const auto module = LoadLibraryA(acLibraryName.c_str());
         if (module != nullptr)
         {
             auto pSystemFunction = reinterpret_cast<void*>(GetProcAddress(module, acFunctionName.c_str()));
-            Add(&pSystemFunction, apFunction, aDelayed);
+            Add(&pSystemFunction, apFunction, false);
 
             return pSystemFunction;
         }
@@ -75,8 +75,7 @@ private:
 #define TP_HOOK(systemFunction, hookFunction) FunctionHookManager::GetInstance().Add(systemFunction, hookFunction, true)
 #define TP_HOOK_IMMEDIATE(systemFunction, hookFunction) FunctionHookManager::GetInstance().Add(systemFunction, hookFunction, false)
 
-#define TP_HOOK_SYSTEM(libraryName, functionName, hookFunction) FunctionHookManager::GetInstance().AddSystem(libraryName, functionName, hookFunction, true)
-#define TP_HOOK_SYSTEM_IMMEDIATE(libraryName, functionName, hookFunction) FunctionHookManager::GetInstance().AddSystem(libraryName, functionName, hookFunction, false)
+#define TP_HOOK_SYSTEM(libraryName, functionName, hookFunction) FunctionHookManager::GetInstance().AddSystem(libraryName, functionName, hookFunction)
 
 #define TP_EMPTY_HOOK_PLACEHOLDER \
 __nop(); \
