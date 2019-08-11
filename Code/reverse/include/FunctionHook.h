@@ -1,27 +1,46 @@
 #pragma once
 
-#include <list>
 #include <memory>
 #include <Stl.h>
 
-// These will run 
 struct FunctionHook
 {
     FunctionHook();
-    virtual ~FunctionHook();
+    explicit FunctionHook(void** appSystemFunction, void* apHookFunction);
+    ~FunctionHook();
+    FunctionHook(const FunctionHook& acRhs) = delete;
+    FunctionHook(FunctionHook&& aRhs) noexcept;
+    FunctionHook& operator=(const FunctionHook& acRhs) = delete;
+    FunctionHook& operator=(FunctionHook&& aRhs) noexcept;
 
-    virtual void Install() = 0;
-    virtual void Uninstall() = 0;
+protected:
+
+    friend class FunctionHookManager;
+
+    void** m_ppSystemFunction;
+    void* m_pHookFunction;
 };
 
 class FunctionHookManager
 {
 public:
 
-    FunctionHookManager();
-    ~FunctionHookManager();
+    FunctionHookManager(const FunctionHookManager&) = delete;
+    FunctionHookManager(FunctionHookManager&&) = delete;
 
-    void Add(std::unique_ptr<FunctionHook> aFunctionHook);
+    FunctionHookManager& operator=(const FunctionHookManager&) = delete;
+    FunctionHookManager& operator=(FunctionHookManager&&) = delete;
+
+    void InstallDelayedHooks();
+    void UninstallHooks();
+
+    void Add(FunctionHook aFunctionHook, bool aDelayed = false);
+
+    template<class T, class U>
+    void Add(T** aSystemFunction, U* aHookFunction, bool aDelayed = false)
+    {
+        Add(FunctionHook(reinterpret_cast<void**>(aSystemFunction), reinterpret_cast<void*>(aHookFunction)), aDelayed);
+    }
 
     static FunctionHookManager& GetInstance()
     {
@@ -31,16 +50,11 @@ public:
 
 private:
 
-    List<std::unique_ptr<FunctionHook>> m_functionHooks;
-};
+    FunctionHookManager();
+    ~FunctionHookManager();
 
-template<class T>
-struct FunctionHookInstaller
-{
-    FunctionHookInstaller()
-    {
-        FunctionHookManager::GetInstance().Add(std::make_unique<T>());
-    }
+    Vector<FunctionHook> m_delayedHooks;
+    Vector<FunctionHook> m_installedHooks;
 };
 
 #define TP_EMPTY_HOOK_PLACEHOLDER \
