@@ -18,7 +18,7 @@ FunctionHook::FunctionHook(void** appSystemFunction, void* apHookFunction)
 
 FunctionHook::~FunctionHook()
 {
-    if(m_ppSystemFunction != nullptr)
+    if (m_ppSystemFunction != nullptr)
     {
         Mhook_Unhook(m_ppSystemFunction);
     }
@@ -50,7 +50,7 @@ void FunctionHookManager::InstallDelayedHooks()
     StackAllocator<1 << 12> allocator;
     const auto pHooks = static_cast<HOOK_INFO*>(allocator.Allocate(sizeof(HOOK_INFO) * m_delayedHooks.size()));
 
-    for(size_t i = 0; i < m_delayedHooks.size(); ++i)
+    for (size_t i = 0; i < m_delayedHooks.size(); ++i)
     {
         pHooks[i].ppSystemFunction = m_delayedHooks[i].m_ppSystemFunction;
         pHooks[i].pHookFunction = m_delayedHooks[i].m_pHookFunction;
@@ -58,7 +58,7 @@ void FunctionHookManager::InstallDelayedHooks()
 
     Mhook_SetHookEx(pHooks, m_delayedHooks.size());
 
-    for(auto& hook : m_delayedHooks)
+    for (auto& hook : m_delayedHooks)
     {
         m_installedHooks.emplace_back(std::move(hook));
     }
@@ -77,7 +77,7 @@ void FunctionHookManager::UninstallHooks()
         m_installedHooks[i].m_ppSystemFunction = nullptr;
     }
 
-    Mhook_UnhookEx(pHooks, m_installedHooks.size());
+    //Mhook_UnhookEx(pHooks, m_installedHooks.size());
 
     m_installedHooks.clear();
 }
@@ -88,7 +88,7 @@ void FunctionHookManager::Add(FunctionHook aFunctionHook, const bool aDelayed)
         m_delayedHooks.emplace_back(std::move(aFunctionHook));
     else
     {
-        if(Mhook_SetHook(aFunctionHook.m_ppSystemFunction, aFunctionHook.m_pHookFunction) == TRUE)
+        if (Mhook_SetHook(aFunctionHook.m_ppSystemFunction, aFunctionHook.m_pHookFunction) == TRUE)
             m_installedHooks.emplace_back(std::move(aFunctionHook));
     }
 }

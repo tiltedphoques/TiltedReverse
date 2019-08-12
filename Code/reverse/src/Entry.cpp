@@ -53,14 +53,25 @@ static void SetupMainHook()
 #if TP_PLATFORM_64
 
 using TGetWinmain = char* (__stdcall*)();
-TGetWinmain OriginalGetWinmain = nullptr;
+using T__crtGetShowWindowMode = short(__stdcall*)();
 
-char* HookGetWinmain()
+TGetWinmain OriginalGetWinmain = nullptr;
+T__crtGetShowWindowMode Original__crtGetShowWindowMode = nullptr;
+
+static std::once_flag s_mainHookCallFlag;
+
+char* __stdcall HookGetWinmain()
 {
-    static std::once_flag s_flag;
-    std::call_once(s_flag, SetupMainHook);
+    std::call_once(s_mainHookCallFlag, SetupMainHook);
 
     return OriginalGetWinmain();
+}
+
+short __stdcall Hook__crtGetShowWindowMode()
+{
+    std::call_once(s_mainHookCallFlag, SetupMainHook);
+
+    return Original__crtGetShowWindowMode();
 }
 
 #else
@@ -83,13 +94,14 @@ BOOL details::TiltedReverseMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReser
     TP_UNUSED(hModule);
     TP_UNUSED(lpReserved);
 
-    switch (fdwReason)                                                                                                                                      
-    {                                                                                                                                                       
-    case DLL_PROCESS_ATTACH:                                                                                                                                
-    {                                     
+    switch (fdwReason)
+    {
+    case DLL_PROCESS_ATTACH:
+    {
         g_pApp = aAppFactory();
 #if TP_PLATFORM_64
         OriginalGetWinmain = reinterpret_cast<TGetWinmain>(TP_HOOK_SYSTEM("api-ms-win-crt-runtime-l1-1-0.dll", "_get_narrow_winmain_command_line", HookGetWinmain));
+        Original__crtGetShowWindowMode = reinterpret_cast<T__crtGetShowWindowMode>(TP_HOOK_SYSTEM("msvcr110.dll", "__crtGetShowWindowMode", Hook__crtGetShowWindowMode));
 #else
         OriginalGetStartupInfoA = reinterpret_cast<TGetStartupInfoA>(TP_HOOK_SYSTEM("kernel32.dll", "GetStartupInfoA", HookedGetStartupInfoA));
 #endif
@@ -98,16 +110,16 @@ BOOL details::TiltedReverseMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReser
 
         FunctionHookManager::GetInstance().InstallDelayedHooks();
 
-        break;                                                                                                                                              
-    }                                                                                                                                                       
-    case DLL_PROCESS_DETACH:                                                                                                                                
-    {              
+        break;
+    }
+    case DLL_PROCESS_DETACH:
+    {
         App::GetInstance().Detach();
 
-        break;                                                                                                                                              
+        break;
     }
     default: break;
-    }                                                                                                                                                       
-        
+    }
+
     return TRUE;
 }
