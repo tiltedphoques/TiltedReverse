@@ -9,7 +9,7 @@
 
 AutoPtrManager AutoPtrManager::s_instance;
 
-AutoPtrManager::AutoPtrManager()
+AutoPtrManager::AutoPtrManager() noexcept
     : m_baseAddress(0), m_textStartAddress(0), m_textSize(0)
 {
     m_baseAddress = reinterpret_cast<uintptr_t>(GetModuleHandle(NULL));
@@ -31,14 +31,14 @@ AutoPtrManager::AutoPtrManager()
     m_textHash = FHash::Crc64(reinterpret_cast<const unsigned char*>(m_textStartAddress), m_textSize);
 }
 
-AutoPtrManager::~AutoPtrManager() = default;
+AutoPtrManager::~AutoPtrManager() noexcept = default;
 
-uintptr_t AutoPtrManager::GetBaseAddress() const
+uintptr_t AutoPtrManager::GetBaseAddress() const noexcept
 {
     return m_baseAddress;
 }
 
-void* AutoPtrManager::Find(Pattern aPattern) const
+void* AutoPtrManager::Find(Pattern aPattern) const noexcept
 {
     const auto* cstart = reinterpret_cast<const uint8_t*>(m_textStartAddress);
     const auto cend = cstart + m_textSize;

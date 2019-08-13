@@ -10,18 +10,18 @@ struct AutoPtrManager
     AutoPtrManager& operator=(const AutoPtrManager&) = delete;
     AutoPtrManager& operator=(AutoPtrManager&&) = delete;
 
-    [[nodiscard]] uintptr_t GetBaseAddress() const;
-    [[nodiscard]] void* Find(Pattern aPattern) const;
+    [[nodiscard]] uintptr_t GetBaseAddress() const noexcept;
+    [[nodiscard]] void* Find(Pattern aPattern) const noexcept;
 
-    static AutoPtrManager& GetInstance()
+    static AutoPtrManager& GetInstance() noexcept
     {
         return s_instance;
     }
 
 private:
 
-    AutoPtrManager();
-    ~AutoPtrManager();
+    AutoPtrManager() noexcept;
+    ~AutoPtrManager() noexcept;
 
     uintptr_t m_baseAddress;
     uintptr_t m_textStartAddress;

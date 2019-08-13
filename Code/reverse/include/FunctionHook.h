@@ -5,9 +5,9 @@
 
 struct FunctionHook
 {
-    FunctionHook();
-    explicit FunctionHook(void** appSystemFunction, void* apHookFunction);
-    ~FunctionHook();
+    FunctionHook() noexcept;
+    explicit FunctionHook(void** appSystemFunction, void* apHookFunction) noexcept;
+    ~FunctionHook() noexcept;
     FunctionHook(const FunctionHook& acRhs) = delete;
     FunctionHook(FunctionHook&& aRhs) noexcept;
     FunctionHook& operator=(const FunctionHook& acRhs) = delete;
@@ -31,19 +31,19 @@ public:
     FunctionHookManager& operator=(const FunctionHookManager&) = delete;
     FunctionHookManager& operator=(FunctionHookManager&&) = delete;
 
-    void InstallDelayedHooks();
-    void UninstallHooks();
+    void InstallDelayedHooks() noexcept;
+    void UninstallHooks() noexcept;
 
-    void Add(FunctionHook aFunctionHook, bool aDelayed = false);
+    void Add(FunctionHook aFunctionHook, bool aDelayed = false) noexcept;
 
     template<class T, class U>
-    void Add(T** aSystemFunction, U* aHookFunction, bool aDelayed = false)
+    void Add(T** aSystemFunction, U* aHookFunction, bool aDelayed = false) noexcept
     {
         Add(FunctionHook(reinterpret_cast<void**>(aSystemFunction), reinterpret_cast<void*>(aHookFunction)), aDelayed);
     }
 
     template<class T>
-    void* AddSystem(const std::string& acLibraryName, const std::string& acFunctionName, T* apFunction)
+    void* AddSystem(const std::string& acLibraryName, const std::string& acFunctionName, T* apFunction) noexcept
     {
         const auto module = LoadLibraryA(acLibraryName.c_str());
         if (module != nullptr)
@@ -57,7 +57,7 @@ public:
         return nullptr;
     }
 
-    static FunctionHookManager& GetInstance()
+    static FunctionHookManager& GetInstance() noexcept
     {
         static FunctionHookManager s_instance;
         return s_instance;
@@ -65,8 +65,8 @@ public:
 
 private:
 
-    FunctionHookManager();
-    ~FunctionHookManager();
+    FunctionHookManager() noexcept;
+    ~FunctionHookManager() noexcept;
 
     Vector<FunctionHook> m_delayedHooks;
     Vector<FunctionHook> m_installedHooks;

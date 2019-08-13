@@ -12,7 +12,7 @@
 
 static std::unique_ptr<App> g_pApp;
 
-App& App::GetInstance()
+App& App::GetInstance() noexcept
 {
     return *g_pApp;
 }
@@ -89,7 +89,7 @@ void __stdcall HookedGetStartupInfoA(LPSTARTUPINFO lpStartupInfo)
 
 #endif
 
-BOOL details::TiltedReverseMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved, const std::function<std::unique_ptr<App>()>& aAppFactory)
+BOOL details::TiltedReverseMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved, const std::function<std::unique_ptr<App>()>& aAppFactory) noexcept
 {
     TP_UNUSED(hModule);
     TP_UNUSED(lpReserved);

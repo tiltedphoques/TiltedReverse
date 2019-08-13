@@ -4,19 +4,19 @@
 #include <StackAllocator.h>
 
 
-FunctionHook::FunctionHook()
+FunctionHook::FunctionHook() noexcept
     : m_ppSystemFunction(nullptr)
     , m_pHookFunction(nullptr)
 {
 }
 
-FunctionHook::FunctionHook(void** appSystemFunction, void* apHookFunction)
+FunctionHook::FunctionHook(void** appSystemFunction, void* apHookFunction) noexcept
     : m_ppSystemFunction(appSystemFunction)
     , m_pHookFunction(apHookFunction)
 {
 }
 
-FunctionHook::~FunctionHook()
+FunctionHook::~FunctionHook() noexcept
 {
     if (m_ppSystemFunction != nullptr)
     {
@@ -38,14 +38,17 @@ FunctionHook& FunctionHook::operator=(FunctionHook&& aRhs) noexcept
     return *this;
 }
 
-FunctionHookManager::FunctionHookManager() = default;
+FunctionHookManager::FunctionHookManager() noexcept
+{
+    
+}
 
-FunctionHookManager::~FunctionHookManager()
+FunctionHookManager::~FunctionHookManager() noexcept
 {
     UninstallHooks();
 }
 
-void FunctionHookManager::InstallDelayedHooks()
+void FunctionHookManager::InstallDelayedHooks() noexcept
 {
     StackAllocator<1 << 12> allocator;
     const auto pHooks = static_cast<HOOK_INFO*>(allocator.Allocate(sizeof(HOOK_INFO) * m_delayedHooks.size()));
@@ -66,7 +69,7 @@ void FunctionHookManager::InstallDelayedHooks()
     m_delayedHooks.clear();
 }
 
-void FunctionHookManager::UninstallHooks()
+void FunctionHookManager::UninstallHooks() noexcept
 {
     StackAllocator<1 << 12> allocator;
     const auto pHooks = static_cast<void***>(allocator.Allocate(sizeof(void**) * m_installedHooks.size()));
@@ -82,7 +85,7 @@ void FunctionHookManager::UninstallHooks()
     m_installedHooks.clear();
 }
 
-void FunctionHookManager::Add(FunctionHook aFunctionHook, const bool aDelayed)
+void FunctionHookManager::Add(FunctionHook aFunctionHook, const bool aDelayed) noexcept
 {
     if (aDelayed)
         m_delayedHooks.emplace_back(std::move(aFunctionHook));

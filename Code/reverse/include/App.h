@@ -2,7 +2,7 @@
 
 struct App
 {
-    App();
+    App() noexcept;
     virtual ~App();
 
     // Retrieve the program's main address, if null is returned the main function will not be hooked
@@ -23,13 +23,13 @@ struct App
     // Must be called once per frame
     virtual void Update() = 0;
 
-    void Start();
+    void Start() noexcept;
 
     // Functions that can be called by class users
-    [[nodiscard]] bool IsReady() const;
+    [[nodiscard]] bool IsReady() const noexcept;
 
 
-    static App& GetInstance();
+    static App& GetInstance() noexcept;
 
 private:
 

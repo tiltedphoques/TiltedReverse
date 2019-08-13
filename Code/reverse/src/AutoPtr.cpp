@@ -3,22 +3,19 @@
 
 #include <cassert>
 
-BasicAutoPtr::BasicAutoPtr(Pattern aPattern)
+BasicAutoPtr::BasicAutoPtr(Pattern aPattern) noexcept
 {
-    // This fails if we aren't done unpacking
-    //assert(App::GetInstance().IsReady());
-
     m_pPtr = AutoPtrManager::GetInstance().Find(std::move(aPattern));
 
     assert(m_pPtr != nullptr);
 }
 
-BasicAutoPtr::BasicAutoPtr(uintptr_t aAddress)
+BasicAutoPtr::BasicAutoPtr(const uintptr_t aAddress) noexcept
 {
     m_pPtr = reinterpret_cast<void*>(aAddress + AutoPtrManager::GetInstance().GetBaseAddress());
 }
 
-void* BasicAutoPtr::GetPtr() const
+void* BasicAutoPtr::GetPtr() const noexcept
 {
     return m_pPtr;
 }
