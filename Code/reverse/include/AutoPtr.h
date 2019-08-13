@@ -31,7 +31,7 @@ struct AutoPtr : BasicAutoPtr
     explicit operator T* () noexcept { return Get(); }
     T* operator->() noexcept { return Get(); }
 
-    T* Get() noexcept { return static_cast<T*>(GetPtr()); }
+    T* Get() const noexcept { return static_cast<T*>(GetPtr()); }
 };
 
 template<class TFunc, class TThis, class... TArgs>
