@@ -28,8 +28,8 @@ struct AutoPtr : BasicAutoPtr
     AutoPtr(AutoPtr&) = delete;
     AutoPtr& operator=(AutoPtr&) = delete;
 
-    explicit operator T* () noexcept { return Get(); }
-    T* operator->() noexcept { return Get(); }
+    explicit operator T* () const noexcept { return Get(); }
+    T* operator->() const noexcept { return Get(); }
 
     T* Get() const noexcept { return static_cast<T*>(GetPtr()); }
 };
