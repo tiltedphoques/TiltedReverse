@@ -23,6 +23,14 @@ protected:
 
 class FunctionHookManager
 {
+protected:
+
+    struct IATHook
+    {
+        void** pThunk;
+        void* pOriginal;
+    };
+
 public:
 
     FunctionHookManager(const FunctionHookManager&) = delete;
@@ -35,6 +43,7 @@ public:
     void UninstallHooks() noexcept;
 
     void Add(FunctionHook aFunctionHook, bool aDelayed = false) noexcept;
+    void* Add(void* apFunctionDetour, const char* acpLibraryName, const char* acpMethod) noexcept;
 
     template<class T, class U>
     void Add(T** aSystemFunction, U* aHookFunction, bool aDelayed = false) noexcept
@@ -70,6 +79,7 @@ private:
 
     Vector<FunctionHook> m_delayedHooks;
     Vector<FunctionHook> m_installedHooks;
+    Vector<IATHook> m_iatHooks;
 };
 
 #define TP_HOOK(systemFunction, hookFunction) FunctionHookManager::GetInstance().Add(systemFunction, hookFunction, true)
