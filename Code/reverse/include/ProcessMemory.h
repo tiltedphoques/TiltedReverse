@@ -10,7 +10,7 @@ struct ProcessMemory
     template<class T, typename = std::enable_if_t<std::is_pod<T>::value>>
     bool Write(const T& acData, const size_t aOffset = 0) const noexcept
     {
-        return WriteBuffer(reinterpret_cast<const unsigned char*>(acData), sizeof(T), aOffset);
+        return WriteBuffer(reinterpret_cast<const unsigned char*>(&acData), sizeof(T), aOffset);
     }
 
     bool WriteBuffer(const unsigned char* acpData, size_t aSize, size_t aOffset) const noexcept;
