@@ -86,6 +86,7 @@ private:
 #define TP_HOOK_IMMEDIATE(systemFunction, hookFunction) FunctionHookManager::GetInstance().Add(systemFunction, hookFunction, false)
 
 #define TP_HOOK_SYSTEM(libraryName, functionName, hookFunction) FunctionHookManager::GetInstance().AddSystem(libraryName, functionName, hookFunction)
+#define TP_HOOK_IAT(functionName, libraryName) Real ##functionName = (T ##functionName)FunctionHookManager::GetInstance().Add(Hook ## functionName, libraryName, #functionName)
 
 #define TP_EMPTY_HOOK_PLACEHOLDER \
 __nop(); \
