@@ -2,6 +2,7 @@
 
 #include <Stl.h>
 #include <Windows.h>
+#include <ProcessMemory.h>
 
 struct FunctionHook
 {
@@ -81,6 +82,18 @@ private:
     Vector<FunctionHook> m_installedHooks;
     Vector<IATHook> m_iatHooks;
 };
+
+template<class T, class Func>
+Func HookVTable(T* pInstance, const size_t aIndex, Func aFunctionPtr)
+{
+    auto pVTable = *reinterpret_cast<uintptr_t**>(pInstance);
+    Func pRealFunction = reinterpret_cast<Func>(pVTable[aIndex]);
+
+    const ProcessMemory memory(&pVTable[aIndex], sizeof(&pVTable[aIndex]));
+    memory.Write(aFunctionPtr);
+
+    return pRealFunction;
+}
 
 #define TP_HOOK(systemFunction, hookFunction) FunctionHookManager::GetInstance().Add(systemFunction, hookFunction, true)
 #define TP_HOOK_IMMEDIATE(systemFunction, hookFunction) FunctionHookManager::GetInstance().Add(systemFunction, hookFunction, false)
