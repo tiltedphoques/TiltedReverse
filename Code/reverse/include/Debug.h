@@ -2,5 +2,6 @@
 
 struct Debug
 {
-    static void WaitForDebugger();
+    static void WaitForDebugger() noexcept;
+    static void CreateConsole() noexcept;
 };
