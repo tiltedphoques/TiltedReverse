@@ -1,7 +1,7 @@
 #define CATCH_CONFIG_RUNNER
 #include "catch.hpp"
 #include <windows.h>
-#include <Platform.h>
+#include <Platform.hpp>
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {

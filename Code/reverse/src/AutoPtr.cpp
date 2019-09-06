@@ -1,5 +1,5 @@
-#include <AutoPtr.h>
-#include <AutoPtrManager.h>
+#include <AutoPtr.hpp>
+#include <AutoPtrManager.hpp>
 
 #include <cassert>
 

@@ -14,7 +14,7 @@ function CreateReverseProject(basePath, coreBasePath)
 
         files
         {
-            basePath .. "/Code/reverse/include/**.h",
+            basePath .. "/Code/reverse/include/**.hpp",
             basePath .. "/Code/reverse/src/**.cpp",
         }
 end
@@ -33,7 +33,7 @@ function CreateLoaderProject(basePath, coreBasePath)
 
         files
         {
-            basePath .. "/Code/loader/include/**.h",
+            basePath .. "/Code/loader/include/**.hpp",
             basePath .. "/Code/loader/src/**.cpp",
         }
         

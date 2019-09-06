@@ -1,7 +1,7 @@
 #include <windows.h>
 
-#include <SteamLauncher.h>
-#include <Registry.h>
+#include <SteamLauncher.hpp>
+#include <Registry.hpp>
 
 #include <filesystem>
 #include <thread>

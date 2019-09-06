@@ -1,8 +1,9 @@
 #pragma once
 
-#include <Stl.h>
 #include <Windows.h>
-#include <ProcessMemory.h>
+
+#include <Stl.hpp>
+#include <ProcessMemory.hpp>
 
 namespace TiltedPhoques
 {

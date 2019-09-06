@@ -1,5 +1,6 @@
-#include <Debug.h>
+#include <Debug.hpp>
 #include <thread>
+
 #include <windows.h>
 
 namespace TiltedPhoques

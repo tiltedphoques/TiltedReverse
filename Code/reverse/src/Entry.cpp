@@ -1,14 +1,15 @@
 #include <windows.h>
 
-#include <Entry.h>
-#include <App.h>
+#include <Entry.hpp>
+#include <App.hpp>
 
 #include <thread>
 #include <mutex>
 
 #include <mhook/mhook.h>
-#include <Platform.h>
-#include "FunctionHook.h"
+
+#include <Platform.hpp>
+#include <FunctionHook.hpp>
 
 static std::unique_ptr<TiltedPhoques::App> g_pApp;
 

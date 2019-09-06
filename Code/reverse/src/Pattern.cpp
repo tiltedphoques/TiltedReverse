@@ -1,4 +1,4 @@
-#include <Pattern.h>
+#include <Pattern.hpp>
 
 namespace TiltedPhoques
 {

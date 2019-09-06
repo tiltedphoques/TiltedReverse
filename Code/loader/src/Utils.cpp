@@ -1,5 +1,5 @@
 #include <windows.h>
-#include <Utils.h>
+#include <Utils.hpp>
 
 std::wstring Utils::ErrorToString(const uint32_t aErrorCode)
 {

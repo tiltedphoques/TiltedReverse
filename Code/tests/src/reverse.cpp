@@ -1,9 +1,9 @@
 #include "catch.hpp"
 
 #include <windows.h>
-#include <Platform.h>
-#include <AutoPtr.h>
-#include <AutoPtrManager.h>
+#include <Platform.hpp>
+#include <AutoPtr.hpp>
+#include <AutoPtrManager.hpp>
 
 using namespace TiltedPhoques;
 

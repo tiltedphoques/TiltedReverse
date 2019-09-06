@@ -1,4 +1,5 @@
-#include <ProcessMemory.h>
+#include <ProcessMemory.hpp>
+
 #include <Windows.h>
 #include <algorithm>
 

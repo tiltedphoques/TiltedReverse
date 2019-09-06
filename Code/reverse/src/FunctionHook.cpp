@@ -1,8 +1,9 @@
-#include <FunctionHook.h>
 #include <windows.h>
 #include <mhook.h>
-#include <StackAllocator.h>
-#include <ProcessMemory.h>
+
+#include <FunctionHook.hpp>
+#include <StackAllocator.hpp>
+#include <ProcessMemory.hpp>
 
 #define RtlOffsetToPointer(Base, Offset) ((PCHAR)(((PCHAR)(Base)) + ((ULONG_PTR)(Offset))))
 

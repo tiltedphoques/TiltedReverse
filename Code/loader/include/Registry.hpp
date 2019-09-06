@@ -1,7 +1,7 @@
 #pragma once
 
-#include <MessageBox.h>
-#include <Utils.h>
+#include <MessageBox.hpp>
+#include <Utils.hpp>
 
 namespace Registry
 {

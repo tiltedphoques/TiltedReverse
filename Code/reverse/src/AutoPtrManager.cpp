@@ -1,9 +1,11 @@
 #pragma warning(disable: 4073)
 #pragma init_seg(lib)
 
-#include <AutoPtrManager.h>
+#include <AutoPtrManager.hpp>
+#include <Hash.hpp>
+
 #include <windows.h>
-#include <Hash.h>
+
 #include <algorithm>
 #include <cassert>
 

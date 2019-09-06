@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Pattern.h>
+#include <Pattern.hpp>
 #include <mutex>
 
 namespace TiltedPhoques

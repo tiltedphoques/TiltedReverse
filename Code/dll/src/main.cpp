@@ -1,7 +1,7 @@
 #include <windows.h>
 
-#include <Entry.h>
-#include <App.h>
+#include <Entry.hpp>
+#include <App.hpp>
 
 // See remark bellow
 void* g_pMainAddress = nullptr;

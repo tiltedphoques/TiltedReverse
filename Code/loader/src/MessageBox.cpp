@@ -1,7 +1,7 @@
 #include <windows.h>
-#include <MessageBox.h>
+#include <MessageBox.hpp>
 
-#include <Utils.h>
+#include <Utils.hpp>
 
 MessageBox::MessageBox()
     : m_type(MB_OK)

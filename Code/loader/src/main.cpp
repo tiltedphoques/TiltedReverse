@@ -1,8 +1,8 @@
 #include <windows.h>
-#include <Platform.h>
-#include <SteamLauncher.h>
-#include <MessageBox.h>
-#include <Config.h>
+#include <Platform.hpp>
+#include <SteamLauncher.hpp>
+#include <MessageBox.hpp>
+#include <Config.hpp>
 
 #include <string>
 #include <iostream>
