@@ -6,158 +6,161 @@
 
 #define RtlOffsetToPointer(Base, Offset) ((PCHAR)(((PCHAR)(Base)) + ((ULONG_PTR)(Offset))))
 
-static void** GetImportedFunction(const char* acpLibraryName, const char* acpMethod) noexcept;
-
-FunctionHook::FunctionHook() noexcept
-    : m_ppSystemFunction(nullptr)
-    , m_pHookFunction(nullptr)
+namespace TiltedPhoques
 {
-}
+	static void** GetImportedFunction(const char* acpLibraryName, const char* acpMethod) noexcept;
 
-FunctionHook::FunctionHook(void** appSystemFunction, void* apHookFunction) noexcept
-    : m_ppSystemFunction(appSystemFunction)
-    , m_pHookFunction(apHookFunction)
-{
-}
+	FunctionHook::FunctionHook() noexcept
+		: m_ppSystemFunction(nullptr)
+		, m_pHookFunction(nullptr)
+	{
+	}
 
-FunctionHook::~FunctionHook() noexcept
-{
-    if (m_ppSystemFunction != nullptr)
-    {
-        Mhook_Unhook(m_ppSystemFunction);
-    }
-}
+	FunctionHook::FunctionHook(void** appSystemFunction, void* apHookFunction) noexcept
+		: m_ppSystemFunction(appSystemFunction)
+		, m_pHookFunction(apHookFunction)
+	{
+	}
 
-FunctionHook::FunctionHook(FunctionHook&& aRhs) noexcept
-    : FunctionHook()
-{
-    this->operator=(std::move(aRhs));
-}
+	FunctionHook::~FunctionHook() noexcept
+	{
+		if (m_ppSystemFunction != nullptr)
+		{
+			Mhook_Unhook(m_ppSystemFunction);
+		}
+	}
 
-FunctionHook& FunctionHook::operator=(FunctionHook&& aRhs) noexcept
-{
-    std::swap(m_ppSystemFunction, aRhs.m_ppSystemFunction);
-    std::swap(m_pHookFunction, aRhs.m_pHookFunction);
+	FunctionHook::FunctionHook(FunctionHook&& aRhs) noexcept
+		: FunctionHook()
+	{
+		this->operator=(std::move(aRhs));
+	}
 
-    return *this;
-}
+	FunctionHook& FunctionHook::operator=(FunctionHook&& aRhs) noexcept
+	{
+		std::swap(m_ppSystemFunction, aRhs.m_ppSystemFunction);
+		std::swap(m_pHookFunction, aRhs.m_pHookFunction);
 
-FunctionHookManager::FunctionHookManager() noexcept
-{
-    
-}
+		return *this;
+	}
 
-FunctionHookManager::~FunctionHookManager() noexcept
-{
-    UninstallHooks();
-}
+	FunctionHookManager::FunctionHookManager() noexcept
+	{
 
-void FunctionHookManager::InstallDelayedHooks() noexcept
-{
-    StackAllocator<1 << 12> allocator;
-    const auto pHooks = static_cast<HOOK_INFO*>(allocator.Allocate(sizeof(HOOK_INFO) * m_delayedHooks.size()));
+	}
 
-    for (size_t i = 0; i < m_delayedHooks.size(); ++i)
-    {
-        pHooks[i].ppSystemFunction = m_delayedHooks[i].m_ppSystemFunction;
-        pHooks[i].pHookFunction = m_delayedHooks[i].m_pHookFunction;
-    }
+	FunctionHookManager::~FunctionHookManager() noexcept
+	{
+		UninstallHooks();
+	}
 
-    Mhook_SetHookEx(pHooks, m_delayedHooks.size());
+	void FunctionHookManager::InstallDelayedHooks() noexcept
+	{
+		StackAllocator<1 << 12> allocator;
+		const auto pHooks = static_cast<HOOK_INFO*>(allocator.Allocate(sizeof(HOOK_INFO) * m_delayedHooks.size()));
 
-    for (auto& hook : m_delayedHooks)
-    {
-        m_installedHooks.emplace_back(std::move(hook));
-    }
+		for (size_t i = 0; i < m_delayedHooks.size(); ++i)
+		{
+			pHooks[i].ppSystemFunction = m_delayedHooks[i].m_ppSystemFunction;
+			pHooks[i].pHookFunction = m_delayedHooks[i].m_pHookFunction;
+		}
 
-    m_delayedHooks.clear();
-}
+		Mhook_SetHookEx(pHooks, m_delayedHooks.size());
 
-void FunctionHookManager::UninstallHooks() noexcept
-{
-    StackAllocator<1 << 12> allocator;
-    const auto pHooks = static_cast<void***>(allocator.Allocate(sizeof(void**) * m_installedHooks.size()));
+		for (auto& hook : m_delayedHooks)
+		{
+			m_installedHooks.emplace_back(std::move(hook));
+		}
 
-    for (size_t i = 0; i < m_installedHooks.size(); ++i)
-    {
-        pHooks[i] = m_installedHooks[i].m_ppSystemFunction;
-        m_installedHooks[i].m_ppSystemFunction = nullptr;
-    }
+		m_delayedHooks.clear();
+	}
 
-    //Mhook_UnhookEx(pHooks, m_installedHooks.size());
+	void FunctionHookManager::UninstallHooks() noexcept
+	{
+		StackAllocator<1 << 12> allocator;
+		const auto pHooks = static_cast<void***>(allocator.Allocate(sizeof(void**) * m_installedHooks.size()));
 
-    m_installedHooks.clear();
+		for (size_t i = 0; i < m_installedHooks.size(); ++i)
+		{
+			pHooks[i] = m_installedHooks[i].m_ppSystemFunction;
+			m_installedHooks[i].m_ppSystemFunction = nullptr;
+		}
 
-    for (auto& iatHook : m_iatHooks)
-    {
-        const ProcessMemory thunkMemory(iatHook.pThunk, sizeof(iatHook.pThunk));
-        thunkMemory.Write(iatHook.pOriginal);
-    }
-}
+		//Mhook_UnhookEx(pHooks, m_installedHooks.size());
 
-void FunctionHookManager::Add(FunctionHook aFunctionHook, const bool aDelayed) noexcept
-{
-    if (aDelayed)
-        m_delayedHooks.emplace_back(std::move(aFunctionHook));
-    else if(Mhook_SetHook(aFunctionHook.m_ppSystemFunction, aFunctionHook.m_pHookFunction) == TRUE)
-        m_installedHooks.emplace_back(std::move(aFunctionHook));
-}
+		m_installedHooks.clear();
 
-void* FunctionHookManager::Add(void* apFunctionDetour, const char* acpLibraryName, const char* acpMethod) noexcept
-{
-    const auto pRealFunctionThunk = GetImportedFunction(acpLibraryName, acpMethod);
+		for (auto& iatHook : m_iatHooks)
+		{
+			const ProcessMemory thunkMemory(iatHook.pThunk, sizeof(iatHook.pThunk));
+			thunkMemory.Write(iatHook.pOriginal);
+		}
+	}
 
-    if (!pRealFunctionThunk)
-        return nullptr;
+	void FunctionHookManager::Add(FunctionHook aFunctionHook, const bool aDelayed) noexcept
+	{
+		if (aDelayed)
+			m_delayedHooks.emplace_back(std::move(aFunctionHook));
+		else if (Mhook_SetHook(aFunctionHook.m_ppSystemFunction, aFunctionHook.m_pHookFunction) == TRUE)
+			m_installedHooks.emplace_back(std::move(aFunctionHook));
+	}
 
-    const auto pRealFunction = *pRealFunctionThunk;
+	void* FunctionHookManager::Add(void* apFunctionDetour, const char* acpLibraryName, const char* acpMethod) noexcept
+	{
+		const auto pRealFunctionThunk = GetImportedFunction(acpLibraryName, acpMethod);
 
-    const ProcessMemory thunkMemory(pRealFunctionThunk, sizeof(void*));
-    thunkMemory.Write(apFunctionDetour);
+		if (!pRealFunctionThunk)
+			return nullptr;
 
-    m_iatHooks.emplace_back(IATHook{pRealFunctionThunk, pRealFunction});
+		const auto pRealFunction = *pRealFunctionThunk;
 
-    return pRealFunction;
-}
+		const ProcessMemory thunkMemory(pRealFunctionThunk, sizeof(void*));
+		thunkMemory.Write(apFunctionDetour);
 
-static void** GetImportedFunction(const char* acpLibraryName, const char* acpMethod) noexcept
-{
-    const auto pBase = GetModuleHandle(nullptr);
+		m_iatHooks.emplace_back(IATHook{ pRealFunctionThunk, pRealFunction });
 
-    const auto pImageDosHeader = reinterpret_cast<PIMAGE_DOS_HEADER>(pBase);
-    auto pImageNtHeaders = reinterpret_cast<PIMAGE_NT_HEADERS>(RtlOffsetToPointer(pBase, pImageDosHeader->e_lfanew));
+		return pRealFunction;
+	}
 
-    const auto pVirtualAddress = pImageNtHeaders->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress;
+	static void** GetImportedFunction(const char* acpLibraryName, const char* acpMethod) noexcept
+	{
+		const auto pBase = GetModuleHandle(nullptr);
 
-    for (auto pImageImportDescriptor = reinterpret_cast<PIMAGE_IMPORT_DESCRIPTOR>(RtlOffsetToPointer(pBase, pVirtualAddress)); pImageImportDescriptor->Name; ++pImageImportDescriptor)
-    {
-        const auto pLibraryName = reinterpret_cast<const char*>RtlOffsetToPointer(pBase, pImageImportDescriptor->Name);
+		const auto pImageDosHeader = reinterpret_cast<PIMAGE_DOS_HEADER>(pBase);
+		auto pImageNtHeaders = reinterpret_cast<PIMAGE_NT_HEADERS>(RtlOffsetToPointer(pBase, pImageDosHeader->e_lfanew));
 
-        if (!_stricmp(pLibraryName, acpLibraryName))
-        {
-            auto pImportAddressTable = reinterpret_cast<uintptr_t*>(RtlOffsetToPointer(pBase, pImageImportDescriptor->FirstThunk));
-            auto pImageThunkData = reinterpret_cast<IMAGE_THUNK_DATA*>(RtlOffsetToPointer(pBase, pImageImportDescriptor->OriginalFirstThunk));
+		const auto pVirtualAddress = pImageNtHeaders->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress;
 
-            while (const auto pOrdinal = pImageThunkData->u1.Ordinal)
-            {
-                const auto pFunctionName = reinterpret_cast<PIMAGE_IMPORT_BY_NAME>(RtlOffsetToPointer(pBase, pImageThunkData->u1.AddressOfData))->Name;
+		for (auto pImageImportDescriptor = reinterpret_cast<PIMAGE_IMPORT_DESCRIPTOR>(RtlOffsetToPointer(pBase, pVirtualAddress)); pImageImportDescriptor->Name; ++pImageImportDescriptor)
+		{
+			const auto pLibraryName = reinterpret_cast<const char*>RtlOffsetToPointer(pBase, pImageImportDescriptor->Name);
 
-                if (IMAGE_SNAP_BY_ORDINAL(pOrdinal))
-                {
-                    // Skip ordinal functions, we just want named functions
-                }
-                else if (!_stricmp(pFunctionName, acpMethod))
-                {
-                    return reinterpret_cast<void**>(pImportAddressTable);
-                }
+			if (!_stricmp(pLibraryName, acpLibraryName))
+			{
+				auto pImportAddressTable = reinterpret_cast<uintptr_t*>(RtlOffsetToPointer(pBase, pImageImportDescriptor->FirstThunk));
+				auto pImageThunkData = reinterpret_cast<IMAGE_THUNK_DATA*>(RtlOffsetToPointer(pBase, pImageImportDescriptor->OriginalFirstThunk));
 
-                ++pImageThunkData;
-                ++pImportAddressTable;
-            }
+				while (const auto pOrdinal = pImageThunkData->u1.Ordinal)
+				{
+					const auto pFunctionName = reinterpret_cast<PIMAGE_IMPORT_BY_NAME>(RtlOffsetToPointer(pBase, pImageThunkData->u1.AddressOfData))->Name;
 
-            return nullptr;
-        }
-    }
+					if (IMAGE_SNAP_BY_ORDINAL(pOrdinal))
+					{
+						// Skip ordinal functions, we just want named functions
+					}
+					else if (!_stricmp(pFunctionName, acpMethod))
+					{
+						return reinterpret_cast<void**>(pImportAddressTable);
+					}
 
-    return nullptr;
+					++pImageThunkData;
+					++pImportAddressTable;
+				}
+
+				return nullptr;
+			}
+		}
+
+		return nullptr;
+	}
 }

@@ -6,7 +6,7 @@
 // See remark bellow
 void* g_pMainAddress = nullptr;
 
-struct TestApp : App
+struct TestApp : TiltedPhoques::App
 {
     TestApp() {};
     virtual ~TestApp() {};

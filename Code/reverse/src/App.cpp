@@ -1,20 +1,23 @@
 #include <App.h>
 
-App::App() noexcept
-    : m_ready(false)
+namespace TiltedPhoques
 {
-}
+	App::App() noexcept
+		: m_ready(false)
+	{
+	}
 
-App::~App() = default;
+	App::~App() = default;
 
-void App::Start() noexcept
-{
-    m_ready = true;
+	void App::Start() noexcept
+	{
+		m_ready = true;
 
-    BeginMain();
-}
+		BeginMain();
+	}
 
-bool App::IsReady() const noexcept
-{
-    return m_ready;
+	bool App::IsReady() const noexcept
+	{
+		return m_ready;
+	}
 }

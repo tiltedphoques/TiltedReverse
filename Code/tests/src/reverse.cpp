@@ -5,6 +5,8 @@
 #include <AutoPtr.h>
 #include <AutoPtrManager.h>
 
+using namespace TiltedPhoques;
+
 int __stdcall FakeWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
     CHECK(true);

@@ -1,7 +1,10 @@
 #pragma once
 
-struct Debug
+namespace TiltedPhoques
 {
-    static void WaitForDebugger() noexcept;
-    static void CreateConsole() noexcept;
-};
+	struct Debug
+	{
+		static void WaitForDebugger() noexcept;
+		static void CreateConsole() noexcept;
+	};
+}

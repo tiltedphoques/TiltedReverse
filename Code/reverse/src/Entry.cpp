@@ -10,9 +10,9 @@
 #include <Platform.h>
 #include "FunctionHook.h"
 
-static std::unique_ptr<App> g_pApp;
+static std::unique_ptr<TiltedPhoques::App> g_pApp;
 
-App& App::GetInstance() noexcept
+TiltedPhoques::App& TiltedPhoques::App::GetInstance() noexcept
 {
     return *g_pApp;
 }
@@ -27,12 +27,12 @@ static int __stdcall HookedWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     {
         ScopedCaller()
         {
-            App::GetInstance().BeginMain();
-            FunctionHookManager::GetInstance().InstallDelayedHooks();
+	        TiltedPhoques::App::GetInstance().BeginMain();
+	        TiltedPhoques::FunctionHookManager::GetInstance().InstallDelayedHooks();
         }
         ~ScopedCaller()
         {
-            App::GetInstance().EndMain();
+	        TiltedPhoques::App::GetInstance().EndMain();
         }
     };
 
@@ -43,7 +43,7 @@ static int __stdcall HookedWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 static void SetupMainHook()
 {
-    OriginalWinMain = static_cast<TWinMain*>(App::GetInstance().GetMainAddress());
+    OriginalWinMain = static_cast<TWinMain*>(TiltedPhoques::App::GetInstance().GetMainAddress());
     if (OriginalWinMain == nullptr)
         return;
 
@@ -89,37 +89,40 @@ void __stdcall HookedGetStartupInfoA(LPSTARTUPINFO lpStartupInfo)
 
 #endif
 
-BOOL details::TiltedReverseMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved, const std::function<std::unique_ptr<App>()>& aAppFactory) noexcept
+namespace TiltedPhoques
 {
-    TP_UNUSED(hModule);
-    TP_UNUSED(lpReserved);
+	BOOL details::ReverseMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved, const std::function<std::unique_ptr<App>()>& aAppFactory) noexcept
+	{
+		TP_UNUSED(hModule);
+		TP_UNUSED(lpReserved);
 
-    switch (fdwReason)
-    {
-    case DLL_PROCESS_ATTACH:
-    {
-        g_pApp = aAppFactory();
+		switch (fdwReason)
+		{
+		case DLL_PROCESS_ATTACH:
+		{
+			g_pApp = aAppFactory();
 #if TP_PLATFORM_64
-        OriginalGetWinmain = reinterpret_cast<TGetWinmain>(TP_HOOK_SYSTEM("api-ms-win-crt-runtime-l1-1-0.dll", "_get_narrow_winmain_command_line", HookGetWinmain));
-        Original__crtGetShowWindowMode = reinterpret_cast<T__crtGetShowWindowMode>(TP_HOOK_SYSTEM("msvcr110.dll", "__crtGetShowWindowMode", Hook__crtGetShowWindowMode));
+			OriginalGetWinmain = reinterpret_cast<TGetWinmain>(TP_HOOK_SYSTEM("api-ms-win-crt-runtime-l1-1-0.dll", "_get_narrow_winmain_command_line", HookGetWinmain));
+			Original__crtGetShowWindowMode = reinterpret_cast<T__crtGetShowWindowMode>(TP_HOOK_SYSTEM("msvcr110.dll", "__crtGetShowWindowMode", Hook__crtGetShowWindowMode));
 #else
-        OriginalGetStartupInfoA = reinterpret_cast<TGetStartupInfoA>(TP_HOOK_SYSTEM("kernel32.dll", "GetStartupInfoA", HookedGetStartupInfoA));
+			OriginalGetStartupInfoA = reinterpret_cast<TGetStartupInfoA>(TP_HOOK_SYSTEM("kernel32.dll", "GetStartupInfoA", HookedGetStartupInfoA));
 #endif
 
-        App::GetInstance().Attach();
+			App::GetInstance().Attach();
 
-        FunctionHookManager::GetInstance().InstallDelayedHooks();
+			FunctionHookManager::GetInstance().InstallDelayedHooks();
 
-        break;
-    }
-    case DLL_PROCESS_DETACH:
-    {
-        App::GetInstance().Detach();
+			break;
+		}
+		case DLL_PROCESS_DETACH:
+		{
+			App::GetInstance().Detach();
 
-        break;
-    }
-    default: break;
-    }
+			break;
+		}
+		default: break;
+		}
 
-    return TRUE;
+		return TRUE;
+	}
 }
