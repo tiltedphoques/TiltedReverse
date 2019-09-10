@@ -18,7 +18,7 @@ struct TestApp : TiltedPhoques::App
 
     void Update() override
     {
-        
+
     }
 
     bool BeginMain() override
