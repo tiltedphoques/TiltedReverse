@@ -45,4 +45,14 @@ namespace TiltedPhoques
 		return aFunction.Get()(aThis.Get(), nullptr, std::forward<TArgs>(args)...);
 #endif
 	}
+
+	template<class TFunc, class TThis, class... TArgs>
+	constexpr auto ThisCall(AutoPtr<TFunc>& aFunction, TThis* apThis, TArgs&& ... args) noexcept
+	{
+#if TP_PLATFORM_64
+		return aFunction.Get()(apThis, std::forward<TArgs>(args)...);
+#else
+		return aFunction.Get()(apThis, nullptr, std::forward<TArgs>(args)...);
+#endif
+	}
 }
