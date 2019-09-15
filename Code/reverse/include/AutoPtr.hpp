@@ -35,24 +35,4 @@ namespace TiltedPhoques
 
 		T* Get() const noexcept { return static_cast<T*>(GetPtr()); }
 	};
-
-	template<class TFunc, class TThis, class... TArgs>
-	constexpr auto ThisCall(AutoPtr<TFunc>& aFunction, AutoPtr<TThis>& aThis, TArgs&& ... args) noexcept
-	{
-#if TP_PLATFORM_64
-		return aFunction.Get()(aThis.Get(), std::forward<TArgs>(args)...);
-#else
-		return aFunction.Get()(aThis.Get(), nullptr, std::forward<TArgs>(args)...);
-#endif
-	}
-
-	template<class TFunc, class TThis, class... TArgs>
-	constexpr auto ThisCall(AutoPtr<TFunc>& aFunction, TThis* apThis, TArgs&& ... args) noexcept
-	{
-#if TP_PLATFORM_64
-		return aFunction.Get()(apThis, std::forward<TArgs>(args)...);
-#else
-		return aFunction.Get()(apThis, nullptr, std::forward<TArgs>(args)...);
-#endif
-	}
 }
