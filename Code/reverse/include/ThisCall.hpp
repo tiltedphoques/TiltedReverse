@@ -5,7 +5,7 @@
 namespace TiltedPhoques
 {
 	template<class TFunc, class TThis, class... TArgs>
-	constexpr auto&& ThisCall(TFunc* aFunction, TThis* apThis, TArgs&& ... args) noexcept
+	constexpr decltype(auto) ThisCall(TFunc* aFunction, TThis* apThis, TArgs&& ... args) noexcept
 	{
 #if TP_PLATFORM_64
 		return aFunction(apThis, std::forward<TArgs>(args)...);
@@ -15,19 +15,19 @@ namespace TiltedPhoques
 	}
 
 	template<class TFunc, class TThis, class... TArgs>
-	constexpr auto&& ThisCall(TFunc* aFunction, AutoPtr<TThis>& aThis, TArgs&& ... args) noexcept
+	constexpr decltype(auto) ThisCall(TFunc* aFunction, AutoPtr<TThis>& aThis, TArgs&& ... args) noexcept
 	{
 		return ThisCall(aFunction, aThis.Get(), args...);
 	}
 
 	template<class TFunc, class TThis, class... TArgs>
-	constexpr auto&& ThisCall(AutoPtr<TFunc>& aFunction, AutoPtr<TThis>& aThis, TArgs&& ... args) noexcept
+	constexpr decltype(auto) ThisCall(AutoPtr<TFunc>& aFunction, AutoPtr<TThis>& aThis, TArgs&& ... args) noexcept
 	{
 		return ThisCall(aFunction.Get(), aThis.Get(), args...);
 	}
 
 	template<class TFunc, class TThis, class... TArgs>
-	constexpr auto&& ThisCall(AutoPtr<TFunc>& aFunction, TThis* apThis, TArgs&& ... args) noexcept
+	constexpr decltype(auto) ThisCall(AutoPtr<TFunc>& aFunction, TThis* apThis, TArgs&& ... args) noexcept
 	{
 		return ThisCall(aFunction.Get(), apThis, args...);
 	}
