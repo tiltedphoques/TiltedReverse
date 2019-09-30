@@ -4,33 +4,33 @@
 
 namespace TiltedPhoques
 {
-	template<class TFunc, class TThis, class... TArgs>
-	constexpr decltype(auto) ThisCall(TFunc* aFunction, TThis* apThis, TArgs&& ... args) noexcept
-	{
+    template<class TFunc, class TThis, class... TArgs>
+    constexpr decltype(auto) ThisCall(TFunc* aFunction, TThis* apThis, TArgs&& ... args) noexcept
+    {
 #if TP_PLATFORM_64
-		return aFunction(apThis, std::forward<TArgs>(args)...);
+        return aFunction(apThis, std::forward<TArgs>(args)...);
 #else
-		return aFunction(apThis, nullptr, std::forward<TArgs>(args)...);
+        return aFunction(apThis, nullptr, std::forward<TArgs>(args)...);
 #endif
-	}
+    }
 
-	template<class TFunc, class TThis, class... TArgs>
-	constexpr decltype(auto) ThisCall(TFunc* aFunction, AutoPtr<TThis>& aThis, TArgs&& ... args) noexcept
-	{
-		return ThisCall(aFunction, aThis.Get(), args...);
-	}
+    template<class TFunc, class TThis, class... TArgs>
+    constexpr decltype(auto) ThisCall(TFunc* aFunction, AutoPtr<TThis>& aThis, TArgs&& ... args) noexcept
+    {
+        return ThisCall(aFunction, aThis.Get(), args...);
+    }
 
-	template<class TFunc, class TThis, class... TArgs>
-	constexpr decltype(auto) ThisCall(AutoPtr<TFunc>& aFunction, AutoPtr<TThis>& aThis, TArgs&& ... args) noexcept
-	{
-		return ThisCall(aFunction.Get(), aThis.Get(), args...);
-	}
+    template<class TFunc, class TThis, class... TArgs>
+    constexpr decltype(auto) ThisCall(AutoPtr<TFunc>& aFunction, AutoPtr<TThis>& aThis, TArgs&& ... args) noexcept
+    {
+        return ThisCall(aFunction.Get(), aThis.Get(), args...);
+    }
 
-	template<class TFunc, class TThis, class... TArgs>
-	constexpr decltype(auto) ThisCall(AutoPtr<TFunc>& aFunction, TThis* apThis, TArgs&& ... args) noexcept
-	{
-		return ThisCall(aFunction.Get(), apThis, args...);
-	}
+    template<class TFunc, class TThis, class... TArgs>
+    constexpr decltype(auto) ThisCall(AutoPtr<TFunc>& aFunction, TThis* apThis, TArgs&& ... args) noexcept
+    {
+        return ThisCall(aFunction.Get(), apThis, args...);
+    }
 }
 
 #if TP_PLATFORM_32
