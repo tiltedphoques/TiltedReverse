@@ -1,6 +1,8 @@
+# Code guidelines
+
 ## Language
 
-We are using C++17, any C++17 feature supported by vs2017 is allowed. 
+We are using C++17, any C++17 feature supported by vs2017 is allowed.
 
 Please try to use templates responsibly, we don't want compilation times to explode and to deal with bloated binaries.
 

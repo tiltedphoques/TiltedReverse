@@ -36,25 +36,25 @@ function CreateLoaderProject(basePath, coreBasePath)
             basePath .. "/Code/loader/include/**.hpp",
             basePath .. "/Code/loader/src/**.cpp",
         }
-        
+
         links
         {
             "Core"
         }
 end
-    
+
 function CreateDisasmProject(basePath)
     project "disasm"
         language "C"
         kind "StaticLib"
         targetname "disasm"
-       
+
         includedirs
         {
             basePath .. "/ThirdParty/disasm/",
         }
-        
-        files 
+
+        files
         {
             basePath .. "/ThirdParty/disasm/**.h",
             basePath .. "/ThirdParty/disasm/**.c",
@@ -66,20 +66,20 @@ function CreateMhookProject(basePath)
         language "C++"
         kind "StaticLib"
         targetname "mhook"
-       
+
         includedirs
         {
             basePath .. "/ThirdParty/mhook/",
             basePath .. "/ThirdParty/disasm/",
         }
-        
-        files 
+
+        files
         {
             basePath .. "/ThirdParty/mhook/**.h",
             basePath .. "/ThirdParty/mhook/**.cpp",
         }
-        
-        links 
+
+        links
         {
             "disasm"
         }
@@ -90,10 +90,10 @@ function LazyReverseProjects(basePath, coreBasePath)
     group ("Applications")
         CreateLoaderProject(basePath, coreBasePath)
 
-    group ("Libraries")   
+    group ("Libraries")
         CreateReverseProject(basePath, coreBasePath)
         CreateCoreProject(coreBasePath)
-    
+
      group("ThirdParty")
         CreateDisasmProject(basePath)
         CreateMhookProject(basePath)

@@ -27,7 +27,7 @@ namespace Registry
     {
         T result = T();
         uint32_t resultSize;
-        
+
         if constexpr (std::is_same_v<T, std::wstring>)
         {
             resultSize = 0;
