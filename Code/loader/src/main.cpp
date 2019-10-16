@@ -132,7 +132,8 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
     }
 
     auto currentDir = std::filesystem::current_path();
-    auto exePath = currentDir / gameExe;
+    auto exePath = std::filesystem::path(gameExe);
+    auto dirPath = exePath.parent_path();
 
     STARTUPINFO startupInfo = { 0 };
     PROCESS_INFORMATION processInfo = { 0 };
@@ -140,7 +141,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
     SetEnvironmentVariableA("SteamGameId", gameId.c_str());
     SetEnvironmentVariableA("SteamAppId", gameId.c_str());
 
-    if (!CreateProcess(exePath.c_str(), pCmdLine, nullptr, nullptr, false, CREATE_SUSPENDED, nullptr, nullptr, &startupInfo, &processInfo))
+    if (!CreateProcess(exePath.c_str(), pCmdLine, nullptr, nullptr, false, CREATE_SUSPENDED, nullptr, dirPath.c_str(), &startupInfo, &processInfo))
     {
         ErrorMessageBox messageBox;
         messageBox << L"An error occured when launching " << exePath << L".";
@@ -152,6 +153,15 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
     auto dllPath = currentDir / dllName;
 
     uint32_t exitCode = EXIT_FAILURE;
+
+    if (!ExecuteFunctionInProcess(processInfo.hProcess, L"kernel32.dll", "SetDllDirectoryW", currentDir.wstring()))
+    {
+        ErrorMessageBox messageBox;
+        messageBox << L"An error occured when adding our DLL path to the process.";
+
+        messageBox.Show();
+        return EXIT_FAILURE;
+    }
 
     // Inject our DLL.
     if (ExecuteFunctionInProcess(processInfo.hProcess, L"kernel32.dll", "LoadLibraryW", dllPath.wstring()))
