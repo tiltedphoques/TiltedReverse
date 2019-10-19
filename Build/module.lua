@@ -41,6 +41,30 @@ function CreateLoaderProject(basePath, coreBasePath)
         {
             "Core"
         }
+
+    project ("Proxy")
+        kind ("SharedLib")
+        language ("C++")
+
+        includedirs
+        {
+            basePath .. "/Code/reverse/include/",
+            basePath .. "/Code/proxy/include/",
+            basePath .. "/Code/loader/include/",
+            coreBasePath .. "/Code/core/include/",
+        }
+
+        files
+        {
+            basePath .. "/Code/loader/src/Config.cpp",
+            basePath .. "/Code/proxy/include/**.hpp",
+            basePath .. "/Code/proxy/src/**.cpp",
+        }
+
+        links
+        {
+            "Core"
+        }
 end
 
 function CreateDisasmProject(basePath)

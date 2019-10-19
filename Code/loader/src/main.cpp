@@ -7,23 +7,8 @@
 #include <string>
 #include <iostream>
 #include <locale>
-#include <codecvt>
 #include <fstream>
 #include <filesystem>
-
-#ifdef PUBLIC_BUILD
-constexpr auto s_dllKey = "DllRelease";
-#else
-constexpr auto s_dllKey = "DllDebug";
-#endif
-
-#ifdef _WIN64
-constexpr auto s_gameIdKey = "GameId64";
-constexpr auto s_gameExeKey = "GamePath64";
-#else
-constexpr auto s_gameIdKey = "GameId32";
-constexpr auto s_gameExeKey = "GamePath32";
-#endif
 
 bool ExecuteFunctionInProcess(HANDLE aProcessHandle, const std::wstring& acModuleName, const std::string& acFunctionName, const std::wstring& acParameter)
 {
@@ -160,7 +145,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 
     auto gameId = config.Get(s_gameIdKey);
     auto gameExe = config.Get(s_gameExeKey);
-    auto dllName = config.Get(s_dllKey);
+    auto dllName = L"Proxy.dll";
 
     if (GetEnvironmentVariable(L"STEAM_COMPAT_DATA_PATH", nullptr, 0) > 0 || GetLastError() != ERROR_ENVVAR_NOT_FOUND)
     {
@@ -199,24 +184,6 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
     auto dllPath = currentDir / dllName;
 
     uint32_t exitCode = EXIT_FAILURE;
-
-    if (!ExecuteFunctionInProcess(processInfo.hProcess, L"kernel32.dll", "SetDefaultDllDirectories", LOAD_LIBRARY_SEARCH_DEFAULT_DIRS))
-    {
-        ErrorMessageBox messageBox;
-        messageBox << L"An error occured when adding our DLL path to the process.";
-
-        messageBox.Show();
-        return EXIT_FAILURE;
-    }
-
-    if (!ExecuteFunctionInProcess(processInfo.hProcess, L"kernel32.dll", "AddDllDirectory", currentDir.wstring()))
-    {
-        ErrorMessageBox messageBox;
-        messageBox << L"An error occured when adding our DLL path to the process.";
-
-        messageBox.Show();
-        return EXIT_FAILURE;
-    }
 
     // Inject our DLL.
     if (ExecuteFunctionInProcess(processInfo.hProcess, L"kernel32.dll", "LoadLibraryW", dllPath.wstring()))
