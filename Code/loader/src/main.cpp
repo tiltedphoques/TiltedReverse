@@ -35,6 +35,26 @@ bool ExecuteFunctionInProcess(HANDLE aProcessHandle, const std::wstring& acModul
         messageBox.Show();
     };
 
+    const auto moduleHandle = GetModuleHandle(acModuleName.c_str());
+    if (!moduleHandle)
+    {
+        showErrorMessage(L"Couldn't find module ", std::quoted(acModuleName), L".");
+        return false;
+    }
+
+    const auto funcAddress = GetProcAddress(moduleHandle, acFunctionName.c_str());
+    if (!funcAddress)
+    {
+        size_t charConverted;
+        const auto message = acFunctionName;
+
+        std::vector<wchar_t> pConvertedString(message.size() + 1);
+        mbstowcs_s(&charConverted, pConvertedString.data(), pConvertedString.size(), message.c_str(), message.size());
+
+        showErrorMessage(L"Couldn't get address for ", std::quoted(pConvertedString.data()), L" from ", std::quoted(acModuleName), L".");
+        return false;
+    }
+
     auto bytesToWrite = (acParameter.size() + 1) * sizeof(std::wstring::value_type);
 
     const auto pBaseAddress = VirtualAllocEx(aProcessHandle, nullptr, bytesToWrite, MEM_COMMIT, PAGE_READWRITE);
@@ -50,6 +70,32 @@ bool ExecuteFunctionInProcess(HANDLE aProcessHandle, const std::wstring& acModul
         showErrorMessage(L"Failed to write ", bytesToWrite, L" in process memory, ", bytesWritten, L" bytes were written.");
         return false;
     }
+
+    const auto thread = CreateRemoteThread(aProcessHandle, nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(funcAddress), pBaseAddress, 0, nullptr);
+
+    if (!thread)
+    {
+        showErrorMessage(L"Couldn't create a thread in the process.");
+        return false;
+    }
+
+    WaitForSingleObject(thread, INFINITE);
+    CloseHandle(thread);
+
+    VirtualFreeEx(aProcessHandle, pBaseAddress, 0, MEM_RELEASE);
+
+    return true;
+}
+
+bool ExecuteFunctionInProcess(HANDLE aProcessHandle, const std::wstring& acModuleName, const std::string& acFunctionName, const uint32_t acParameter)
+{
+    const auto showErrorMessage = [&aProcessHandle](auto&& ... args)
+    {
+        ErrorMessageBox messageBox;
+        ((messageBox << args), ...);
+
+        messageBox.Show();
+    };
 
     const auto moduleHandle = GetModuleHandle(acModuleName.c_str());
     if (!moduleHandle)
@@ -71,7 +117,8 @@ bool ExecuteFunctionInProcess(HANDLE aProcessHandle, const std::wstring& acModul
         return false;
     }
 
-    const auto thread = CreateRemoteThread(aProcessHandle, nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(funcAddress), pBaseAddress, 0, nullptr);
+    const auto thread = CreateRemoteThread(aProcessHandle, nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(funcAddress), (LPVOID)acParameter, 0, nullptr);
+
     if (!thread)
     {
         showErrorMessage(L"Couldn't create a thread in the process.");
@@ -81,7 +128,6 @@ bool ExecuteFunctionInProcess(HANDLE aProcessHandle, const std::wstring& acModul
     WaitForSingleObject(thread, INFINITE);
     CloseHandle(thread);
 
-    VirtualFreeEx(aProcessHandle, pBaseAddress, 0, MEM_RELEASE);
     return true;
 }
 
@@ -154,7 +200,16 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 
     uint32_t exitCode = EXIT_FAILURE;
 
-    if (!ExecuteFunctionInProcess(processInfo.hProcess, L"kernel32.dll", "SetDllDirectoryW", currentDir.wstring()))
+    if (!ExecuteFunctionInProcess(processInfo.hProcess, L"kernel32.dll", "SetDefaultDllDirectories", LOAD_LIBRARY_SEARCH_DEFAULT_DIRS))
+    {
+        ErrorMessageBox messageBox;
+        messageBox << L"An error occured when adding our DLL path to the process.";
+
+        messageBox.Show();
+        return EXIT_FAILURE;
+    }
+
+    if (!ExecuteFunctionInProcess(processInfo.hProcess, L"kernel32.dll", "AddDllDirectory", currentDir.wstring()))
     {
         ErrorMessageBox messageBox;
         messageBox << L"An error occured when adding our DLL path to the process.";
