@@ -115,5 +115,6 @@ workspace ("Tilted Reverse")
                 "disasm"
             }
 
-    LazyReverseProjects("..", "../../TiltedCore")
+    
+    premake.extensions.reverse.generate()
 

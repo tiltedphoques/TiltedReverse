@@ -1,25 +1,66 @@
-function CreateReverseProject(basePath, coreBasePath)
-    project ("Reverse")
-        kind ("StaticLib")
-        language ("C++")
+premake.extensions.reverse = {}
+
+function reverse_parent_path()
+    local str = debug.getinfo(2, "S").source:sub(2)
+    local dir =  str:match("(.*/)"):sub(0,-2)
+    local index = string.find(dir, "/[^/]*$")
+    return dir:sub(0, index)
+end
+
+function mhook_generate()
+
+    local basePath = premake.extensions.reverse.path
+
+    project "mhook"
+        language "C++"
+        kind "StaticLib"
+        targetname "mhook"
 
         includedirs
         {
-            basePath .. "/Code/reverse/include/",
-            coreBasePath .. "/Code/core/include/",
             basePath .. "/ThirdParty/mhook/",
-            basePath .. "/ThirdParty/",
             basePath .. "/ThirdParty/disasm/",
         }
 
         files
         {
-            basePath .. "/Code/reverse/include/**.hpp",
-            basePath .. "/Code/reverse/src/**.cpp",
+            basePath .. "/ThirdParty/mhook/**.h",
+            basePath .. "/ThirdParty/mhook/**.cpp",
+        }
+
+        links
+        {
+            "disasm"
+        }
+
+end
+
+function disasm_generate(basePath)
+
+    local basePath = premake.extensions.reverse.path
+
+    project "disasm"
+        language "C"
+        kind "StaticLib"
+        targetname "disasm"
+
+        includedirs
+        {
+            basePath .. "/ThirdParty/disasm/",
+        }
+
+        files
+        {
+            basePath .. "/ThirdParty/disasm/**.h",
+            basePath .. "/ThirdParty/disasm/**.c",
         }
 end
 
-function CreateLoaderProject(basePath, coreBasePath)
+function loader_generate(basePath, coreBasePath)
+
+    local basePath = premake.extensions.reverse.path
+    local coreBasePath = premake.extensions.core.path
+
     project ("Loader")
         kind ("WindowedApp")
         language ("C++")
@@ -67,58 +108,49 @@ function CreateLoaderProject(basePath, coreBasePath)
         }
 end
 
-function CreateDisasmProject(basePath)
-    project "disasm"
-        language "C"
-        kind "StaticLib"
-        targetname "disasm"
+function reverse_generate()
+
+    local basePath = premake.extensions.reverse.path
+    local coreBasePath = premake.extensions.core.path    
+
+    project ("Reverse")
+        kind ("StaticLib")
+        language ("C++")
 
         includedirs
         {
-            basePath .. "/ThirdParty/disasm/",
-        }
-
-        files
-        {
-            basePath .. "/ThirdParty/disasm/**.h",
-            basePath .. "/ThirdParty/disasm/**.c",
-        }
-end
-
-function CreateMhookProject(basePath)
-    project "mhook"
-        language "C++"
-        kind "StaticLib"
-        targetname "mhook"
-
-        includedirs
-        {
+            basePath .. "/Code/reverse/include/",
+            coreBasePath .. "/Code/core/include/",
             basePath .. "/ThirdParty/mhook/",
+            basePath .. "/ThirdParty/",
             basePath .. "/ThirdParty/disasm/",
         }
 
         files
         {
-            basePath .. "/ThirdParty/mhook/**.h",
-            basePath .. "/ThirdParty/mhook/**.cpp",
+            basePath .. "/Code/reverse/include/**.hpp",
+            basePath .. "/Code/reverse/src/**.cpp",
         }
-
-        links
-        {
-            "disasm"
-        }
-
 end
 
-function LazyReverseProjects(basePath, coreBasePath)
+function reverse_generate_all()
+    if premake.extensions.reverse.generated == true then
+        return
+    end
+
     group ("Applications")
-        CreateLoaderProject(basePath, coreBasePath)
+        loader_generate()
+
+    group ("ThirdParty")
+        mhook_generate()
+        disasm_generate()
 
     group ("Libraries")
-        CreateReverseProject(basePath, coreBasePath)
-        CreateCoreProject(coreBasePath)
+        reverse_generate()
+        premake.extensions.core.generate()
 
-     group("ThirdParty")
-        CreateDisasmProject(basePath)
-        CreateMhookProject(basePath)
+    premake.extensions.reverse.generated = true
 end
+
+premake.extensions.reverse.path = reverse_parent_path()
+premake.extensions.reverse.generate = reverse_generate_all
