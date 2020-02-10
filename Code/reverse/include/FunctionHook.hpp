@@ -105,6 +105,8 @@ namespace TiltedPhoques
 #define TP_HOOK_SYSTEM(libraryName, functionName, hookFunction) TiltedPhoques::FunctionHookManager::GetInstance().AddSystem(libraryName, functionName, hookFunction)
 #define TP_HOOK_IAT(functionName, libraryName) Real ##functionName = (T ##functionName)TiltedPhoques::FunctionHookManager::GetInstance().Add(Hook ## functionName, libraryName, #functionName)
 
+#define TP_HOOK_COMMIT TiltedPhoques::FunctionHookManager::GetInstance().InstallDelayedHooks();
+
 #define TP_EMPTY_HOOK_PLACEHOLDER \
 __nop(); \
 __nop(); \

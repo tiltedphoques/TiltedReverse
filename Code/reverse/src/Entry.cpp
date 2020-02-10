@@ -6,8 +6,6 @@
 #include <thread>
 #include <mutex>
 
-#include <mhook/mhook.h>
-
 #include <Platform.hpp>
 #include <FunctionHook.hpp>
 
@@ -29,7 +27,8 @@ static int __stdcall HookedWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
         ScopedCaller()
         {
             TiltedPhoques::App::GetInstance().BeginMain();
-            TiltedPhoques::FunctionHookManager::GetInstance().InstallDelayedHooks();
+
+            TP_HOOK_COMMIT
         }
         ~ScopedCaller()
         {
@@ -48,8 +47,10 @@ static void SetupMainHook()
     if (OriginalWinMain == nullptr)
         return;
 
-    Mhook_SetHook(reinterpret_cast<PVOID*>(&OriginalWinMain), &HookedWinMain);
+    TP_HOOK_IMMEDIATE(&OriginalWinMain, HookedWinMain);
 }
+
+static std::once_flag s_mainHookCallFlag;
 
 #if TP_PLATFORM_64
 
@@ -58,8 +59,6 @@ using T__crtGetShowWindowMode = short(__stdcall*)();
 
 TGetWinmain OriginalGetWinmain = nullptr;
 T__crtGetShowWindowMode Original__crtGetShowWindowMode = nullptr;
-
-static std::once_flag s_mainHookCallFlag;
 
 char* __stdcall HookGetWinmain()
 {
@@ -82,8 +81,7 @@ TGetStartupInfoA OriginalGetStartupInfoA = nullptr;
 
 void __stdcall HookedGetStartupInfoA(LPSTARTUPINFO lpStartupInfo)
 {
-    static std::once_flag s_flag;
-    std::call_once(s_flag, SetupMainHook);
+    std::call_once(s_mainHookCallFlag, SetupMainHook);
 
     OriginalGetStartupInfoA(lpStartupInfo);
 }
@@ -111,7 +109,7 @@ namespace TiltedPhoques
 
             App::GetInstance().Attach();
 
-            FunctionHookManager::GetInstance().InstallDelayedHooks();
+            TP_HOOK_COMMIT
 
             break;
         }
