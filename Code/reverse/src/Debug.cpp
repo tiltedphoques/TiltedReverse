@@ -6,7 +6,7 @@
 
 namespace TiltedPhoques
 {
-    PVOID vehHandler = NULL;
+    PVOID s_pVectoredHandler = nullptr;
 
     void Debug::WaitForDebugger() noexcept
     {
@@ -27,28 +27,30 @@ namespace TiltedPhoques
         }
     }
 
-    LONG WINAPI OnException(PEXCEPTION_POINTERS ExceptionInfo) {
+    LONG WINAPI OnException(PEXCEPTION_POINTERS apExceptionInfo)
+    {
         ReleaseCapture(); // Release Skyrim's mouse capture - best effort
 
         // Perhaps EXCEPTION_EXECUTE_HANDLER is more in order, in case someone after us handles the exception graceully?
         return EXCEPTION_CONTINUE_SEARCH;
 
-        UNREFERENCED_PARAMETER(ExceptionInfo);
+        UNREFERENCED_PARAMETER(apExceptionInfo);
     }
 
     void Debug::OnAttach() noexcept
     {
-        const int CALL_LAST = 0;
-        const int CALL_FIRST = 1;
+        const int cCallLast = 0;
+        const int cCallFirst = 1;
         assert(vehHandler == NULL);
-        vehHandler = AddVectoredExceptionHandler(CALL_LAST, OnException);
+        s_pVectoredHandler = AddVectoredExceptionHandler(cCallFirst, OnException);
         assert(vehHandler != NULL);
     }
 
     void Debug::OnDettach() noexcept
     {
-        if (vehHandler) {
-            RemoveVectoredExceptionHandler(vehHandler);
+        if (s_pVectoredHandler)
+        {
+            RemoveVectoredExceptionHandler(s_pVectoredHandler);
         }
     }
 }
