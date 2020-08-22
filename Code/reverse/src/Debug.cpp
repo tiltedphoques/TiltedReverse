@@ -41,9 +41,9 @@ namespace TiltedPhoques
     {
         const int cCallLast = 0;
         const int cCallFirst = 1;
-        assert(vehHandler == NULL);
+        assert(s_pVectoredHandler == NULL);
         s_pVectoredHandler = AddVectoredExceptionHandler(cCallFirst, OnException);
-        assert(vehHandler != NULL);
+        assert(s_pVectoredHandler != NULL);
     }
 
     void Debug::OnDettach() noexcept
