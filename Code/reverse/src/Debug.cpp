@@ -6,7 +6,7 @@
 
 namespace TiltedPhoques
 {
-    PVOID s_pVectoredHandler = nullptr;
+    static PVOID s_pVectoredHandler = nullptr;
 
     void Debug::WaitForDebugger() noexcept
     {
