@@ -29,9 +29,10 @@ namespace TiltedPhoques
 
     LONG WINAPI OnException(PEXCEPTION_POINTERS apExceptionInfo)
     {
-        ReleaseCapture(); // Release Skyrim's mouse capture - best effort
+        // Release Skyrim's mouse capture - best effort
+        ReleaseCapture();
 
-        // Perhaps EXCEPTION_EXECUTE_HANDLER is more in order, in case someone after us handles the exception graceully?
+        // Perhaps EXCEPTION_EXECUTE_HANDLER is more in order, in case someone after us handles the exception gracefully?
         return EXCEPTION_CONTINUE_SEARCH;
 
         UNREFERENCED_PARAMETER(apExceptionInfo);
@@ -46,7 +47,7 @@ namespace TiltedPhoques
         assert(s_pVectoredHandler != NULL);
     }
 
-    void Debug::OnDettach() noexcept
+    void Debug::OnDetach() noexcept
     {
         if (s_pVectoredHandler)
         {
