@@ -2,7 +2,7 @@
 #include <mhook.h>
 
 #include <FunctionHook.hpp>
-#include <StackAllocator.hpp>
+#include <TiltedCore/StackAllocator.hpp>
 #include <ProcessMemory.hpp>
 
 #define RtlOffsetToPointer(Base, Offset) ((PCHAR)(((PCHAR)(Base)) + ((ULONG_PTR)(Offset))))
@@ -66,7 +66,7 @@ namespace TiltedPhoques
             pHooks[i].pHookFunction = m_delayedHooks[i].m_pHookFunction;
         }
 
-        Mhook_SetHookEx(pHooks, m_delayedHooks.size());
+        Mhook_SetHookEx(pHooks, static_cast<int>(m_delayedHooks.size()));
 
         for (auto& hook : m_delayedHooks)
         {

@@ -266,7 +266,7 @@ typedef NTSTATUS(NTAPI* PZwQuerySystemInformation)(
     );
 
 #define STATUS_INFO_LENGTH_MISMATCH      ((NTSTATUS)0xC0000004L)
-static PZwQuerySystemInformation fnZwQuerySystemInformation = reinterpret_cast<PZwQuerySystemInformation>(GetProcAddress(GetModuleHandle(L"ntdll.dll"), "ZwQuerySystemInformation"));
+static PZwQuerySystemInformation fnZwQuerySystemInformation = reinterpret_cast<PZwQuerySystemInformation>(GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "ZwQuerySystemInformation"));
 
 //=========================================================================
 // Internal function:

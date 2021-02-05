@@ -2,7 +2,7 @@
 #pragma init_seg(lib)
 
 #include <AutoPtrManager.hpp>
-#include <Hash.hpp>
+#include <TiltedCore/Hash.hpp>
 
 #include <windows.h>
 

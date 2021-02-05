@@ -6,7 +6,7 @@
 #include <thread>
 #include <mutex>
 
-#include <Platform.hpp>
+#include <TiltedCore/Platform.hpp>
 #include <FunctionHook.hpp>
 
 static std::unique_ptr<TiltedPhoques::App> g_pApp;
