@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <unordered_map>
-#include <Platform.hpp>
+#include <TiltedCore/Platform.hpp>
 
 #ifdef PUBLIC_BUILD
 constexpr auto s_dllKey = "DllRelease";

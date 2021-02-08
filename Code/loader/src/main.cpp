@@ -1,5 +1,5 @@
 #include <windows.h>
-#include <Platform.hpp>
+#include <TiltedCore/Platform.hpp>
 #include <SteamLauncher.hpp>
 #include <MessageBox.hpp>
 #include <Config.hpp>
@@ -20,7 +20,7 @@ bool ExecuteFunctionInProcess(HANDLE aProcessHandle, const std::wstring& acModul
         messageBox.Show();
     };
 
-    const auto moduleHandle = GetModuleHandle(acModuleName.c_str());
+    const auto moduleHandle = GetModuleHandleW(acModuleName.c_str());
     if (!moduleHandle)
     {
         showErrorMessage(L"Couldn't find module ", std::quoted(acModuleName), L".");
@@ -82,7 +82,7 @@ bool ExecuteFunctionInProcess(HANDLE aProcessHandle, const std::wstring& acModul
         messageBox.Show();
     };
 
-    const auto moduleHandle = GetModuleHandle(acModuleName.c_str());
+    const auto moduleHandle = GetModuleHandleW(acModuleName.c_str());
     if (!moduleHandle)
     {
         showErrorMessage(L"Couldn't find module ", std::quoted(acModuleName), L".");
@@ -126,7 +126,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
     wchar_t** argList;
     int argCount;
 
-    argList = CommandLineToArgvW(GetCommandLine(), &argCount);
+    argList = CommandLineToArgvW(GetCommandLineW(), &argCount);
     if (argList != nullptr)
     {
         for (auto i = 0; i < argCount; i++)
@@ -147,7 +147,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
     auto gameExe = config.Get(s_gameExeKey);
     auto dllName = L"Proxy.dll";
 
-    if (GetEnvironmentVariable(L"STEAM_COMPAT_DATA_PATH", nullptr, 0) > 0 || GetLastError() != ERROR_ENVVAR_NOT_FOUND)
+    if (GetEnvironmentVariableW(L"STEAM_COMPAT_DATA_PATH", nullptr, 0) > 0 || GetLastError() != ERROR_ENVVAR_NOT_FOUND)
     {
         std::ofstream ofs("steam_appid.txt");
         ofs << gameId << std::endl;
@@ -166,13 +166,13 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
     auto exePath = std::filesystem::path(gameExe);
     auto dirPath = exePath.parent_path();
 
-    STARTUPINFO startupInfo = { 0 };
+    STARTUPINFOW startupInfo = { 0 };
     PROCESS_INFORMATION processInfo = { 0 };
 
     SetEnvironmentVariableA("SteamGameId", gameId.c_str());
     SetEnvironmentVariableA("SteamAppId", gameId.c_str());
 
-    if (!CreateProcess(exePath.c_str(), pCmdLine, nullptr, nullptr, false, CREATE_SUSPENDED, nullptr, dirPath.c_str(), &startupInfo, &processInfo))
+    if (!CreateProcessW(exePath.c_str(), pCmdLine, nullptr, nullptr, false, CREATE_SUSPENDED, nullptr, dirPath.c_str(), &startupInfo, &processInfo))
     {
         ErrorMessageBox messageBox;
         messageBox << L"An error occured when launching " << exePath << L".";

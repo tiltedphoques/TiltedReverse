@@ -38,6 +38,7 @@ target("Loader")
     add_files("Code/loader/src/*.cpp")
     add_headerfiles("Code/loader/include/*.hpp", {prefixdir = "Loader"})
     add_packages("tiltedcore", "mimalloc", "hopscotch-map")
+    add_syslinks("user32", "shell32")
 
 target("Proxy")
     set_kind("shared")
@@ -45,7 +46,6 @@ target("Proxy")
     add_includedirs(
         "Code/reverse/include/", 
         "Code/loader/include/",
-        "Code/proxy/include/",
         {public = true})
     add_files(
         "Code/loader/src/Config.cpp",

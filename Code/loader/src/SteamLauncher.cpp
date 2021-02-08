@@ -27,10 +27,10 @@ void SteamLauncher::Launch() const
     const std::filesystem::path installPath = Registry::Read<std::wstring>(Registry::Key::CurrentUser, L"SOFTWARE", L"Valve", L"Steam", L"SteamPath");
     const std::filesystem::path exePath = Registry::Read<std::wstring>(Registry::Key::CurrentUser, L"SOFTWARE", L"Valve", L"Steam", L"SteamExe");
 
-    STARTUPINFO startupInfo = { 0 };
+    STARTUPINFOW startupInfo = { 0 };
     PROCESS_INFORMATION processInfo = { 0 };
 
-    if (!CreateProcess(exePath.c_str(), nullptr, nullptr, nullptr, false, 0, nullptr, installPath.c_str(), &startupInfo, &processInfo))
+    if (!CreateProcessW(exePath.c_str(), nullptr, nullptr, nullptr, false, 0, nullptr, installPath.c_str(), &startupInfo, &processInfo))
     {
         ErrorMessageBox messageBox;
         messageBox << L"An error occured when launching " << exePath << L".";

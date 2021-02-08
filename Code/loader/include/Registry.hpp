@@ -96,7 +96,7 @@ namespace Registry
 
         if constexpr (std::is_same_v<T, std::wstring>)
         {
-            auto returnCode = RegGetValue(key, subKey.c_str(), value.c_str(), RRF_RT_REG_SZ, nullptr, nullptr, reinterpret_cast<LPDWORD>(&resultSize));
+            auto returnCode = RegGetValueW(key, subKey.c_str(), value.c_str(), RRF_RT_REG_SZ, nullptr, nullptr, reinterpret_cast<LPDWORD>(&resultSize));
             if (returnCode != ERROR_SUCCESS)
             {
                 showErrorAndTerminate(returnCode);
@@ -114,11 +114,11 @@ namespace Registry
 
         if constexpr (std::is_same_v<T, std::wstring>)
         {
-            returnCode = RegGetValue(key, subKey.c_str(), value.c_str(), RRF_RT_REG_SZ, nullptr, &result[0], reinterpret_cast<LPDWORD>(&resultSize));
+            returnCode = RegGetValueW(key, subKey.c_str(), value.c_str(), RRF_RT_REG_SZ, nullptr, &result[0], reinterpret_cast<LPDWORD>(&resultSize));
         }
         else
         {
-            returnCode = RegGetValue(key, subKey.c_str(), value.c_str(), RRF_RT_REG_DWORD | RRF_RT_REG_QWORD, nullptr, &result, reinterpret_cast<LPDWORD>(&resultSize));
+            returnCode = RegGetValueW(key, subKey.c_str(), value.c_str(), RRF_RT_REG_DWORD | RRF_RT_REG_QWORD, nullptr, &result, reinterpret_cast<LPDWORD>(&resultSize));
         }
 
         if (returnCode != ERROR_SUCCESS)
