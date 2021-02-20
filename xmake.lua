@@ -19,20 +19,21 @@ target("TiltedReverse")
     set_kind("static")
     set_group("Libraries")
     add_includedirs(
-        "Code/reverse/include/", 
-        "ThirdParty/", 
-        "/ThirdParty/disasm/", 
+        "Code/reverse/include/",
+        "ThirdParty/",
+        "/ThirdParty/disasm/",
         "/ThirdParty/mhook/",
         {public = true})
     add_files("Code/reverse/src/*.cpp")
     add_headerfiles("Code/reverse/include/*.hpp", {prefixdir = "TiltedReverse"})
+    add_deps("disasm", "mhook")
     add_packages("tiltedcore", "mimalloc", "hopscotch-map")
 
 target("Loader")
     set_kind("binary")
     set_group("Libraries")
     add_includedirs(
-        "Code/reverse/include/", 
+        "Code/reverse/include/",
         "Code/loader/include/",
         {public = true})
     add_files("Code/loader/src/*.cpp")
@@ -44,7 +45,7 @@ target("Proxy")
     set_kind("shared")
     set_group("Libraries")
     add_includedirs(
-        "Code/reverse/include/", 
+        "Code/reverse/include/",
         "Code/loader/include/",
         {public = true})
     add_files(
@@ -66,7 +67,7 @@ target("mhook")
     set_kind("static")
     set_group("Libraries")
     add_includedirs(
-        "ThirdParty/mhook/", 
+        "ThirdParty/mhook/",
         "ThirdParty/disasm/",
         {public = true})
     add_files("ThirdParty/mhook/*.cpp")
