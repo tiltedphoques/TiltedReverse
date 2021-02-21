@@ -9,7 +9,7 @@
 
 namespace TiltedPhoques
 {
-    static void** GetImportedFunction(const char* acpLibraryName, const char* acpMethod) noexcept;
+    static void** GetImportedFunction(const wchar_t *acpModuleName, const char* acpLibraryName, const char* acpMethod) noexcept;
 
     FunctionHook::FunctionHook() noexcept
         : m_ppSystemFunction(nullptr)
@@ -108,7 +108,7 @@ namespace TiltedPhoques
 
     void* FunctionHookManager::Add(void* apFunctionDetour, const char* acpLibraryName, const char* acpMethod) noexcept
     {
-        const auto pRealFunctionThunk = GetImportedFunction(acpLibraryName, acpMethod);
+        const auto pRealFunctionThunk = GetImportedFunction(nullptr, acpLibraryName, acpMethod);
 
         if (!pRealFunctionThunk)
             return nullptr;
@@ -123,9 +123,9 @@ namespace TiltedPhoques
         return pRealFunction;
     }
 
-    static void** GetImportedFunction(const char* acpLibraryName, const char* acpMethod) noexcept
+    static void** GetImportedFunction(const wchar_t *acpModuleName, const char* acpLibraryName, const char* acpMethod) noexcept
     {
-        const auto pBase = GetModuleHandle(nullptr);
+        const auto pBase = GetModuleHandleW(acpModuleName);
 
         const auto pImageDosHeader = reinterpret_cast<PIMAGE_DOS_HEADER>(pBase);
         auto pImageNtHeaders = reinterpret_cast<PIMAGE_NT_HEADERS>(RtlOffsetToPointer(pBase, pImageDosHeader->e_lfanew));
