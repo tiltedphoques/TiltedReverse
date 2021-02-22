@@ -2,7 +2,7 @@ set_languages("cxx17")
 
 set_xmakever("2.5.1")
 
-add_requires("tiltedcore", "mimalloc", "hopscotch-map", {configs = {rltgenrandom = true }})
+add_requires("tiltedcore", "mimalloc", "hopscotch-map", "minhook", {configs = {rltgenrandom = true }})
 add_requires("catch2")
 
 add_rules("mode.debug","mode.releasedbg", "mode.release")
@@ -26,8 +26,7 @@ target("TiltedReverse")
         {public = true})
     add_files("Code/reverse/src/*.cpp")
     add_headerfiles("Code/reverse/include/*.hpp", {prefixdir = "TiltedReverse"})
-    add_deps("disasm", "mhook")
-    add_packages("tiltedcore", "mimalloc", "hopscotch-map")
+    add_packages("tiltedcore", "mimalloc", "hopscotch-map", "minhook")
 
 target("Loader")
     set_kind("binary")
@@ -54,29 +53,9 @@ target("Proxy")
     add_headerfiles("Code/loader/include/*.hpp", {prefixdir = "Loader"})
     add_packages("tiltedcore", "mimalloc", "hopscotch-map")
 
-target("disasm")
-    set_kind("static")
-    set_group("Libraries")
-    add_includedirs(
-        "ThirdParty/disasm/",
-        {public = true})
-    add_files("ThirdParty/disasm/*.c")
-    add_headerfiles("ThirdParty/disasm/*.h", {prefixdir = "disasm"})
-
-target("mhook")
-    set_kind("static")
-    set_group("Libraries")
-    add_includedirs(
-        "ThirdParty/mhook/",
-        "ThirdParty/disasm/",
-        {public = true})
-    add_files("ThirdParty/mhook/*.cpp")
-    add_headerfiles("ThirdParty/mhook/*.h", {prefixdir = "mhook"})
-    add_links("disasm")
-
 target("TiltedReverse_Tests")
     set_kind("binary")
     set_group("Tests")
     add_files("Code/tests/src/*.cpp")
     add_deps("TiltedReverse")
-    add_packages("tiltedcore", "catch2", "hopscotch-map")
+    add_packages("tiltedcore", "catch2", "hopscotch-map", "minhook")

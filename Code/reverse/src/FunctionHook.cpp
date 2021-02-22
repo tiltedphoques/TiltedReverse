@@ -1,5 +1,5 @@
 #include <windows.h>
-#include <mhook.h>
+#include <MinHook.h>
 
 #include <FunctionHook.hpp>
 #include <TiltedCore/StackAllocator.hpp>
@@ -27,7 +27,8 @@ namespace TiltedPhoques
     {
         if (m_ppSystemFunction != nullptr)
         {
-            Mhook_Unhook(m_ppSystemFunction);
+            MH_DisableHook(*m_ppSystemFunction);
+            MH_RemoveHook(*m_ppSystemFunction);
         }
     }
 
@@ -57,19 +58,10 @@ namespace TiltedPhoques
 
     void FunctionHookManager::InstallDelayedHooks() noexcept
     {
-        StackAllocator<1 << 12> allocator;
-        const auto pHooks = static_cast<HOOK_INFO*>(allocator.Allocate(sizeof(HOOK_INFO) * m_delayedHooks.size()));
-
-        for (size_t i = 0; i < m_delayedHooks.size(); ++i)
-        {
-            pHooks[i].ppSystemFunction = m_delayedHooks[i].m_ppSystemFunction;
-            pHooks[i].pHookFunction = m_delayedHooks[i].m_pHookFunction;
-        }
-
-        Mhook_SetHookEx(pHooks, static_cast<int>(m_delayedHooks.size()));
-
         for (auto& hook : m_delayedHooks)
         {
+            MH_CreateHook(*hook.m_ppSystemFunction, hook.m_pHookFunction, hook.m_ppSystemFunction);
+            MH_EnableHook(*hook.m_ppSystemFunction);
             m_installedHooks.emplace_back(std::move(hook));
         }
 
@@ -78,12 +70,8 @@ namespace TiltedPhoques
 
     void FunctionHookManager::UninstallHooks() noexcept
     {
-        StackAllocator<1 << 12> allocator;
-        const auto pHooks = static_cast<void***>(allocator.Allocate(sizeof(void**) * m_installedHooks.size()));
-
         for (size_t i = 0; i < m_installedHooks.size(); ++i)
         {
-            pHooks[i] = m_installedHooks[i].m_ppSystemFunction;
             m_installedHooks[i].m_ppSystemFunction = nullptr;
         }
 
@@ -102,7 +90,8 @@ namespace TiltedPhoques
     {
         if (aDelayed)
             m_delayedHooks.emplace_back(std::move(aFunctionHook));
-        else if (Mhook_SetHook(aFunctionHook.m_ppSystemFunction, aFunctionHook.m_pHookFunction) == TRUE)
+        else if (MH_CreateHook(*aFunctionHook.m_ppSystemFunction, aFunctionHook.m_pHookFunction, aFunctionHook.m_ppSystemFunction) == MH_OK &&
+                 MH_EnableHook(*aFunctionHook.m_ppSystemFunction) == MH_OK)
             m_installedHooks.emplace_back(std::move(aFunctionHook));
     }
 
