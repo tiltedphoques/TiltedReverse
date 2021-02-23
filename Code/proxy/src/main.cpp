@@ -5,9 +5,6 @@
 
 void LoadComplexLibrary(HMODULE aModule)
 {
-    while (!IsDebuggerPresent())
-        Sleep(1000);
-        
     wchar_t szPath[MAX_PATH];
 
     if (!GetModuleFileNameW(aModule, szPath, MAX_PATH))
