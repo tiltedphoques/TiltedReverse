@@ -21,7 +21,8 @@ namespace TiltedPhoques
 
         friend class FunctionHookManager;
 
-        void** m_ppSystemFunction;
+        void** m_ppDetourFunction;
+        void* m_pSystemFunction;
         void* m_pHookFunction;
     };
 

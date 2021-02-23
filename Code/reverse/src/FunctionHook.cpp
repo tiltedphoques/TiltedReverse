@@ -12,23 +12,25 @@ namespace TiltedPhoques
     static void** GetImportedFunction(const wchar_t *acpModuleName, const char* acpLibraryName, const char* acpMethod) noexcept;
 
     FunctionHook::FunctionHook() noexcept
-        : m_ppSystemFunction(nullptr)
+        : m_ppDetourFunction(nullptr)
+        , m_pSystemFunction(nullptr)
         , m_pHookFunction(nullptr)
     {
     }
 
     FunctionHook::FunctionHook(void** appSystemFunction, void* apHookFunction) noexcept
-        : m_ppSystemFunction(appSystemFunction)
+        : m_ppDetourFunction(appSystemFunction)
+        , m_pSystemFunction(*appSystemFunction)
         , m_pHookFunction(apHookFunction)
     {
     }
 
     FunctionHook::~FunctionHook() noexcept
     {
-        if (m_ppSystemFunction != nullptr)
+        if (m_ppDetourFunction != nullptr)
         {
-            MH_DisableHook(*m_ppSystemFunction);
-            MH_RemoveHook(*m_ppSystemFunction);
+            MH_DisableHook(m_pSystemFunction);
+            MH_RemoveHook(m_pSystemFunction);
         }
     }
 
@@ -40,7 +42,8 @@ namespace TiltedPhoques
 
     FunctionHook& FunctionHook::operator=(FunctionHook&& aRhs) noexcept
     {
-        std::swap(m_ppSystemFunction, aRhs.m_ppSystemFunction);
+        std::swap(m_ppDetourFunction, aRhs.m_ppDetourFunction);
+        std::swap(m_pSystemFunction, aRhs.m_pSystemFunction);
         std::swap(m_pHookFunction, aRhs.m_pHookFunction);
 
         return *this;
@@ -48,20 +51,22 @@ namespace TiltedPhoques
 
     FunctionHookManager::FunctionHookManager() noexcept
     {
-
+        MH_Initialize();
     }
 
     FunctionHookManager::~FunctionHookManager() noexcept
     {
         UninstallHooks();
+
+        MH_Uninitialize();
     }
 
     void FunctionHookManager::InstallDelayedHooks() noexcept
     {
         for (auto& hook : m_delayedHooks)
         {
-            MH_CreateHook(*hook.m_ppSystemFunction, hook.m_pHookFunction, hook.m_ppSystemFunction);
-            MH_EnableHook(*hook.m_ppSystemFunction);
+            MH_CreateHook(hook.m_pSystemFunction, hook.m_pHookFunction, hook.m_ppDetourFunction);
+            MH_EnableHook(hook.m_pSystemFunction);
             m_installedHooks.emplace_back(std::move(hook));
         }
 
@@ -72,7 +77,7 @@ namespace TiltedPhoques
     {
         for (size_t i = 0; i < m_installedHooks.size(); ++i)
         {
-            m_installedHooks[i].m_ppSystemFunction = nullptr;
+            m_installedHooks[i].m_ppDetourFunction = nullptr;
         }
 
         //Mhook_UnhookEx(pHooks, m_installedHooks.size());
@@ -90,8 +95,8 @@ namespace TiltedPhoques
     {
         if (aDelayed)
             m_delayedHooks.emplace_back(std::move(aFunctionHook));
-        else if (MH_CreateHook(*aFunctionHook.m_ppSystemFunction, aFunctionHook.m_pHookFunction, aFunctionHook.m_ppSystemFunction) == MH_OK &&
-                 MH_EnableHook(*aFunctionHook.m_ppSystemFunction) == MH_OK)
+        else if (MH_CreateHook(aFunctionHook.m_pSystemFunction, aFunctionHook.m_pHookFunction, aFunctionHook.m_ppDetourFunction) == MH_OK &&
+                 MH_EnableHook(aFunctionHook.m_pSystemFunction) == MH_OK)
             m_installedHooks.emplace_back(std::move(aFunctionHook));
     }
 

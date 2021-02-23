@@ -5,6 +5,9 @@
 
 void LoadComplexLibrary(HMODULE aModule)
 {
+    while (!IsDebuggerPresent())
+        Sleep(1000);
+        
     wchar_t szPath[MAX_PATH];
 
     if (!GetModuleFileNameW(aModule, szPath, MAX_PATH))
@@ -20,6 +23,7 @@ void LoadComplexLibrary(HMODULE aModule)
     const auto dllName = config.Get(s_dllKey);
     const auto dllPath = currentDir / dllName;
 
+    SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS | LOAD_LIBRARY_SEARCH_USER_DIRS);
     AddDllDirectory(currentDir.wstring().c_str());
     LoadLibraryExW(dllPath.wstring().c_str(), nullptr, LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
 }
@@ -31,6 +35,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
     switch(fdwReason)
     {
     case DLL_PROCESS_ATTACH:
+        DisableThreadLibraryCalls(hModule);
         LoadComplexLibrary(hModule);
         break;
     default:
