@@ -55,10 +55,10 @@ static std::once_flag s_mainHookCallFlag;
 #if TP_PLATFORM_64
 
 using TGetWinmain = char* (__stdcall*)();
-using T__crtGetShowWindowMode = short(__stdcall*)();
+using T_initterm = decltype(&::_initterm);
 
-TGetWinmain OriginalGetWinmain = nullptr;
-T__crtGetShowWindowMode Original__crtGetShowWindowMode = nullptr;
+static TGetWinmain OriginalGetWinmain = nullptr;
+static T_initterm Original_initterm = nullptr;
 
 char* __stdcall HookGetWinmain()
 {
@@ -67,11 +67,11 @@ char* __stdcall HookGetWinmain()
     return OriginalGetWinmain();
 }
 
-short __stdcall Hook__crtGetShowWindowMode()
+void Hookinitterm(_PVFV* apStart, _PVFV* apEnd) noexcept
 {
     std::call_once(s_mainHookCallFlag, SetupMainHook);
 
-    return Original__crtGetShowWindowMode();
+    Original_initterm(apStart, apEnd);
 }
 
 #else
@@ -102,7 +102,7 @@ namespace TiltedPhoques
             g_pApp = aAppFactory();
 #if TP_PLATFORM_64
             OriginalGetWinmain = reinterpret_cast<TGetWinmain>(TP_HOOK_SYSTEM("api-ms-win-crt-runtime-l1-1-0.dll", "_get_narrow_winmain_command_line", HookGetWinmain));
-            Original__crtGetShowWindowMode = reinterpret_cast<T__crtGetShowWindowMode>(TP_HOOK_SYSTEM("msvcr110.dll", "__crtGetShowWindowMode", Hook__crtGetShowWindowMode));
+            Original_initterm = reinterpret_cast<T_initterm>(TP_HOOK_SYSTEM("msvcr110.dll", "_initterm", Hookinitterm));
 #else
             OriginalGetStartupInfoA = reinterpret_cast<TGetStartupInfoA>(TP_HOOK_SYSTEM("kernel32.dll", "GetStartupInfoA", HookedGetStartupInfoA));
 #endif
