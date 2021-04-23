@@ -12,9 +12,9 @@ namespace TiltedPhoques
             kDirect
         };
 
-        Pattern(Vector<uint8_t> aBytePattern, size_t aExpected, EType aPatternType, intptr_t aOffset = 0, size_t aIndex = 0) noexcept;
+        Pattern(const char* acpBytePattern, size_t aExpected = 1, EType aPatternType = kDirect, intptr_t aOffset = 0, size_t aIndex = 0) noexcept;
 
-        Vector<uint8_t> BytePattern;
+        const char* BytePattern;
         size_t Expected;
         EType Type;
         intptr_t Offset{ 0 };

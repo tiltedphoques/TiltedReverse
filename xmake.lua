@@ -2,7 +2,7 @@ set_languages("cxx17")
 
 set_xmakever("2.5.1")
 
-add_requires("tiltedcore", "hopscotch-map", "minhook", "catch2")
+add_requires("tiltedcore", "hopscotch-map", "minhook", "catch2", "mem")
 
 add_rules("mode.debug","mode.releasedbg", "mode.release")
 add_rules("plugin.vsxmake.autoupdate")
@@ -20,11 +20,11 @@ target("TiltedReverse")
     add_includedirs("Code/reverse/include/", {public = true})
     add_files("Code/reverse/src/*.cpp")
     add_headerfiles("Code/reverse/include/*.hpp", {prefixdir = "TiltedReverse"})
-    add_packages("tiltedcore", "mimalloc", "hopscotch-map", "minhook")
+    add_packages("tiltedcore", "mimalloc", "hopscotch-map", "minhook", "mem")
 
 target("TiltedReverse_Tests")
     set_kind("binary")
     set_group("Tests")
     add_files("Code/tests/src/*.cpp")
     add_deps("TiltedReverse")
-    add_packages("tiltedcore", "catch2", "hopscotch-map", "minhook")
+    add_packages("tiltedcore", "catch2", "hopscotch-map", "minhook", "mem")
