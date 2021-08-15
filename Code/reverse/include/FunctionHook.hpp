@@ -3,7 +3,7 @@
 #include <Windows.h>
 
 #include <TiltedCore/Stl.hpp>
-#include <ProcessMemory.hpp>
+#include <Memory.hpp>
 
 namespace TiltedPhoques
 {
@@ -93,7 +93,7 @@ namespace TiltedPhoques
         auto pVTable = *reinterpret_cast<uintptr_t * *>(pInstance);
         Func pRealFunction = reinterpret_cast<Func>(pVTable[aIndex]);
 
-        const ProcessMemory memory(&pVTable[aIndex], sizeof(&pVTable[aIndex]));
+        const detail::ProcessMemory memory(&pVTable[aIndex], sizeof(&pVTable[aIndex]));
         memory.Write(aFunctionPtr);
 
         return pRealFunction;
