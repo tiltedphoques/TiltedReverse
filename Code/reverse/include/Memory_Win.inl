@@ -1,5 +1,5 @@
 
-namespace TiltedPhoques::detail
+namespace TiltedPhoques
 {
     ProcessMemory::ProcessMemory(void* apMemoryLocation, const size_t aSize) noexcept
         : m_oldProtect(0)

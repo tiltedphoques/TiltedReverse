@@ -86,7 +86,7 @@ namespace TiltedPhoques
 
         for (auto& iatHook : m_iatHooks)
         {
-            const detail::ProcessMemory thunkMemory(iatHook.pThunk, sizeof(iatHook.pThunk));
+            const ProcessMemory thunkMemory(iatHook.pThunk, sizeof(iatHook.pThunk));
             thunkMemory.Write(iatHook.pOriginal);
         }
     }
@@ -109,7 +109,7 @@ namespace TiltedPhoques
 
         const auto pRealFunction = *pRealFunctionThunk;
 
-        const detail::ProcessMemory thunkMemory(pRealFunctionThunk, sizeof(void*));
+        const ProcessMemory thunkMemory(pRealFunctionThunk, sizeof(void*));
         thunkMemory.Write(apFunctionDetour);
 
         m_iatHooks.emplace_back(IATHook{ pRealFunctionThunk, pRealFunction });

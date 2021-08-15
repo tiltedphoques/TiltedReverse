@@ -23,58 +23,78 @@ namespace TiltedPhoques
 
             return u.out;
         };
-
-        class ProcessMemory
-        {
-        public:
-            inline ProcessMemory(void* apMemoryLocation, size_t aSize) noexcept;
-            inline ~ProcessMemory();
-
-            template<class T>
-            bool Write(const T& acData, const size_t aOffset = 0) const noexcept
-            {
-                return WriteBuffer(reinterpret_cast<const unsigned char*>(&acData), sizeof(T), aOffset);
-            }
-
-            inline bool WriteBuffer(const unsigned char* acpData, size_t aSize, size_t aOffset) const noexcept;
-
-        private:
-
-            unsigned long m_oldProtect;
-            void* m_pMemoryLocation;
-            size_t m_size;
-        };
     }
 
-    template<typename TVar, typename TAddress>
-    bool Write(const TAddress acAddress, const TVar acVal, const size_t acOffset = 0) noexcept
+    class ProcessMemory
     {
-        AutoPtr<TVar> ptr(static_cast<uintptr_t>(acAddress));
+    public:
+        inline ProcessMemory(void* apMemoryLocation, size_t aSize) noexcept;
+        inline ~ProcessMemory();
 
-        const detail::ProcessMemory memory(ptr.Get(), sizeof(TVar));
-        return memory.Write(acVal, acOffset);
+        template<class T>
+        bool Write(const T& acData, const size_t aOffset = 0) const noexcept
+        {
+            return WriteBuffer(reinterpret_cast<const unsigned char*>(&acData), sizeof(T), aOffset);
+        }
+
+        inline bool WriteBuffer(const unsigned char* acpData, size_t aSize, size_t aOffset) const noexcept;
+
+    private:
+
+        unsigned long m_oldProtect;
+        void* m_pMemoryLocation;
+        size_t m_size;
+    };
+
+    namespace vp
+    {
+        template<typename TVar, typename TAddress>
+        bool Write(const TAddress acAddress, const TVar acVal, const size_t acOffset = 0) noexcept
+        {
+            AutoPtr<TVar> ptr(static_cast<uintptr_t>(acAddress));
+
+            const ProcessMemory memory(ptr.Get(), sizeof(TVar));
+            return memory.Write(acVal, acOffset);
+        }
+
+        template<typename TAddress>
+        bool Nop(const TAddress acAddress, size_t aLength) noexcept
+        {
+            AutoPtr<TAddress> ptr(static_cast<uintptr_t>(acAddress));
+
+            const ProcessMemory memory(ptr.Get(), aLength);
+            return memory.WriteBuffer(reinterpret_cast<const unsigned char*>(ptr.Get()), aLength, 0);
+        }
+    }
+
+
+    template<typename TVar, typename TAddress>
+    void Write(const TAddress acAddress, const TVar acVal) noexcept
+    {
+        // BURN SFINAE
+        if constexpr(std::is_pod_v<TVar>)
+            *(TVar*)((uintptr_t)acAddress) = acVal;
+        else
+            std::memcpy((void*)acAddress, &acVal, sizeof(TVar));
     }
 
     template<typename TAddress>
-    bool Nop(const TAddress acAddress, size_t aLength) noexcept
+    void Nop(const TAddress acAddress, size_t aLength) noexcept
     {
-        AutoPtr<TAddress> ptr(static_cast<uintptr_t>(acAddress));
-
-        const detail::ProcessMemory memory(ptr.Get(), aLength);
-        return memory.WriteBuffer(reinterpret_cast<const unsigned char*>(ptr.Get()), aLength, 0);
+        std::memset((void*)acAddress, 0x90, aLength);
     }
 
     // jump function
     template<typename TNewFunc, typename TAddr>
-    void Jump(TAddr aAdress, TNewFunc aNew) noexcept
+    constexpr void Jump(const TAddr aAddress, const TNewFunc& aNew) noexcept
     {
-        Write<uint8_t>(aAdress, 0xE9);
-        Write<int32_t>((uintptr_t)aAdress + 1, (intptr_t)aNew - (intptr_t)aAdress - 5);
+        Write<uint8_t>(aAddress, 0xE9);
+        Write<int32_t>((uintptr_t)aAddress + 1, (intptr_t)aNew - (intptr_t)aAddress - 5);
     }
 
     // jump class member function
-    template<typename TNewFunc>
-    void JumpCMF(uintptr_t aOldAddress, const TNewFunc &aNew) noexcept
+    template<typename TNewFunc, typename TAddr>
+    constexpr void JumpCMF(const TAddr aOldAddress, const TNewFunc& aNew) noexcept
     {
         const void* pNewFunc = detail::PunType<const void*>(aNew);
         Jump(aOldAddress, pNewFunc);
