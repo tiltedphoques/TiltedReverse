@@ -58,18 +58,21 @@ namespace TiltedPhoques
         detail::currentBase = disp.as<ptrdiff_t>();
     }
 
+    constexpr bool IsVAOnly(const mem::pointer aEa)
+    {
+        // don't tune fixed addresses, which are bigger than a VA.
+        return aEa <= UINT_MAX;
+    }
+
     MEM_STRONG_INLINE void TuneBase(mem::pointer &arAddress)
     {
-        // don't edit large addresses.
-        // consteval should help in the future!!
-        if (arAddress <= UINT_MAX)
-            arAddress.add(detail::currentBase.as<size_t>());
+        arAddress.add(detail::currentBase.as<size_t>());
     }
 
     template<typename T>
     MEM_STRONG_INLINE void Put(mem::pointer aEa, const T acVal) noexcept
     {
-        TuneBase(aEa);
+        if (IsVAOnly(aEa)) TuneBase(aEa);
 
         if constexpr(std::is_pod_v<T> && sizeof(T) < sizeof(uintptr_t))
             // directly set value if it fits within one register
@@ -80,7 +83,7 @@ namespace TiltedPhoques
 
     MEM_STRONG_INLINE void Nop(mem::pointer aEa, size_t aLength) noexcept
     {
-        TuneBase(aEa);
+        if (IsVAOnly(aEa)) TuneBase(aEa);
         mem::region(aEa, aLength).fill(0x90);
     }
 
@@ -88,7 +91,7 @@ namespace TiltedPhoques
     template<typename T>
     MEM_STRONG_INLINE constexpr void Jump(const mem::pointer aEa, const T& aFunc) noexcept
     {
-        TuneBase(aEa);
+        if (IsVAOnly(aEa)) TuneBase(aEa);
         Put<uint8_t>(aEa, 0xE9);
         Put<int32_t>(aEa.as<intptr_t>() + 1, (intptr_t)aFunc - aEa.as<intptr_t>() - 5);
     }
@@ -97,7 +100,7 @@ namespace TiltedPhoques
     template<typename T>
     MEM_STRONG_INLINE constexpr void JumpCMF(const mem::pointer aEa, const T& aFunc) noexcept
     {
-        TuneBase(aEa);
+        if (IsVAOnly(aEa)) TuneBase(aEa);
         Jump(aEa, detail::PunType<const void*>(aFunc));
     }
 
