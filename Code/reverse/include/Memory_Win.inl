@@ -1,26 +1,26 @@
 
-namespace TiltedPhoques
+namespace TiltedPhoques::vp
 {
-    ProcessMemory::ProcessMemory(void* apMemoryLocation, const size_t aSize) noexcept
+    ScopedContext::ScopedContext(const mem::pointer aEa, const size_t aSize) noexcept
         : m_oldProtect(0)
-        , m_pMemoryLocation(apMemoryLocation)
+        , m_ea(aEa)
         , m_size(aSize)
     {
-        VirtualProtect(m_pMemoryLocation, m_size, PAGE_EXECUTE_READWRITE, &m_oldProtect);
+        VirtualProtect(aEa.as<void*>(), m_size, PAGE_EXECUTE_READWRITE, reinterpret_cast<DWORD*>(&m_oldProtect));
     }
 
-    ProcessMemory::~ProcessMemory()
+    ScopedContext::~ScopedContext()
     {
-        VirtualProtect(m_pMemoryLocation, m_size, m_oldProtect, &m_oldProtect);
+        VirtualProtect(m_ea.as<void*>(), m_size, m_oldProtect, reinterpret_cast<DWORD*>(&m_oldProtect));
     }
 
-    bool ProcessMemory::WriteBuffer(const unsigned char* acpData, const size_t aSize, const size_t aOffset) const noexcept
+    bool ScopedContext::WriteBuffer(const uint8_t* acpData, const size_t aSize, const size_t aOffset) const noexcept
     {
         if (aSize + aOffset > m_size)
             return false;
 
-        auto* pMemory = reinterpret_cast<unsigned char*>(m_pMemoryLocation) + aOffset;
-        std::copy(acpData, acpData + aSize, pMemory);
+        auto memory = m_ea + aOffset;
+        std::copy(acpData, acpData + aSize, memory.as<uint8_t*>());
 
         return true;
     }

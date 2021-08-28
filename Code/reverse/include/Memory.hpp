@@ -3,8 +3,15 @@
 #include <Windows.h>
 #include <AutoPtr.hpp>
 
+#include <mem/mem.h>
+#include <mem/module.h>
+
+#include <MemoryVP.h>
+
 namespace TiltedPhoques
 {
+    using TNameHandler = void(*)(void*, const char*);
+
     namespace detail
     {
         // dumbs down a class member ptr to a generic
@@ -23,85 +30,78 @@ namespace TiltedPhoques
 
             return u.out;
         };
+
+        inline static mem::pointer currentBase;
+        inline static TNameHandler nameHandler = nullptr;
     }
 
-    class ProcessMemory
+    class BaseOverrideContext final
     {
     public:
-        inline ProcessMemory(void* apMemoryLocation, size_t aSize) noexcept;
-        inline ~ProcessMemory();
-
-        template<class T>
-        bool Write(const T& acData, const size_t aOffset = 0) const noexcept
+        inline BaseOverrideContext(const mem::pointer aNewPtr)
         {
-            return WriteBuffer(reinterpret_cast<const unsigned char*>(&acData), sizeof(T), aOffset);
+            m_prevBase = detail::currentBase;
+            detail::currentBase = aNewPtr;
         }
 
-        inline bool WriteBuffer(const unsigned char* acpData, size_t aSize, size_t aOffset) const noexcept;
-
+        inline ~BaseOverrideContext()
+        {
+            detail::currentBase = m_prevBase;
+        }
     private:
-
-        unsigned long m_oldProtect;
-        void* m_pMemoryLocation;
-        size_t m_size;
+        mem::pointer m_prevBase;
     };
 
-    namespace vp
+    inline void SetBase(const mem::pointer acBase, const mem::module* apOptModule)
     {
-        template<typename TVar, typename TAddress>
-        bool Write(const TAddress acAddress, const TVar acVal, const size_t acOffset = 0) noexcept
-        {
-            AutoPtr<TVar> ptr(static_cast<uintptr_t>(acAddress));
-
-            const ProcessMemory memory(ptr.Get(), sizeof(TVar));
-            return memory.Write(acVal, acOffset);
-        }
-
-        template<typename TAddress>
-        bool Nop(const TAddress acAddress, size_t aLength) noexcept
-        {
-            AutoPtr<TAddress> ptr(static_cast<uintptr_t>(acAddress));
-
-            const ProcessMemory memory(ptr.Get(), aLength);
-            return memory.WriteBuffer(reinterpret_cast<const unsigned char*>(ptr.Get()), aLength, 0);
-        }
+        const mem::pointer disp = apOptModule ? acBase - apOptModule->start : acBase - 0x140000000;
+        detail::currentBase = disp.as<ptrdiff_t>();
     }
 
-
-    template<typename TVar, typename TAddress>
-    void Write(const TAddress acAddress, const TVar acVal) noexcept
+    MEM_STRONG_INLINE void TuneBase(mem::pointer &arAddress)
     {
-        // BURN SFINAE
-        if constexpr(std::is_pod_v<TVar>)
-            *(TVar*)((uintptr_t)acAddress) = acVal;
+        // don't edit large addresses.
+        // consteval should help in the future!!
+        if (arAddress <= UINT_MAX)
+            arAddress.add(detail::currentBase.as<size_t>());
+    }
+
+    template<typename T>
+    MEM_STRONG_INLINE void Put(mem::pointer aEa, const T acVal) noexcept
+    {
+        TuneBase(aEa);
+
+        if constexpr(std::is_pod_v<T> && sizeof(T) < sizeof(uintptr_t))
+            // directly set value if it fits within one register
+            *reinterpret_cast<T*>(aEa.as<uintptr_t>()) = acVal;
         else
-            std::memcpy((void*)acAddress, &acVal, sizeof(TVar));
+            std::memcpy(aEa.as<void*>(), &acVal, sizeof(T));
     }
 
-    template<typename TAddress>
-    void Nop(const TAddress acAddress, size_t aLength) noexcept
+    MEM_STRONG_INLINE void Nop(mem::pointer aEa, size_t aLength) noexcept
     {
-        std::memset((void*)acAddress, 0x90, aLength);
+        TuneBase(aEa);
+        mem::region(aEa, aLength).fill(0x90);
     }
 
     // jump function
-    template<typename TNewFunc, typename TAddr>
-    constexpr void Jump(const TAddr aAddress, const TNewFunc& aNew) noexcept
+    template<typename T>
+    MEM_STRONG_INLINE constexpr void Jump(const mem::pointer aEa, const T& aFunc) noexcept
     {
-        Write<uint8_t>(aAddress, 0xE9);
-        Write<int32_t>((uintptr_t)aAddress + 1, (intptr_t)aNew - (intptr_t)aAddress - 5);
+        TuneBase(aEa);
+        Put<uint8_t>(aEa, 0xE9);
+        Put<int32_t>(aEa.as<intptr_t>() + 1, (intptr_t)aFunc - aEa.as<intptr_t>() - 5);
     }
 
     // jump class member function
-    template<typename TNewFunc, typename TAddr>
-    constexpr void JumpCMF(const TAddr aOldAddress, const TNewFunc& aNew) noexcept
+    template<typename T>
+    MEM_STRONG_INLINE constexpr void JumpCMF(const mem::pointer aEa, const T& aFunc) noexcept
     {
-        const void* pNewFunc = detail::PunType<const void*>(aNew);
-        Jump(aOldAddress, pNewFunc);
+        TuneBase(aEa);
+        Jump(aEa, detail::PunType<const void*>(aFunc));
     }
-}
 
-#if defined(_WIN32)
-#include <Memory_Win.inl>
-#endif
-// TODO: maybe Linux?
+    // Support code for reflection - don't use
+    MEM_STRONG_INLINE void SetNameHandler(TNameHandler aHandler) { detail::nameHandler = aHandler; }
+    MEM_STRONG_INLINE void InvokeNameHandler(const char* apcName) { detail::nameHandler(nullptr, apcName); }
+}
