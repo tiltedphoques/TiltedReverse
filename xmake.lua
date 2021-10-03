@@ -3,7 +3,12 @@ set_arch("x64")
 
 set_xmakever("2.5.1")
 
-add_requires("tiltedcore", "hopscotch-map", "minhook", "catch2", "mem")
+add_requires(
+    "tiltedcore", 
+    "hopscotch-map", 
+    "minhook", 
+    "catch2", 
+    "mem")
 
 add_rules("mode.debug","mode.releasedbg", "mode.release")
 add_rules("plugin.vsxmake.autoupdate")
@@ -32,4 +37,4 @@ target("TiltedReverse_Tests")
     set_group("Tests")
     add_files("Code/tests/src/*.cpp")
     add_deps("TiltedReverse")
-    add_packages("tiltedcore", "catch2", "hopscotch-map", "minhook", "mem")
+    add_packages("tiltedcore", "catch2", "hopscotch-map", "minhook")
