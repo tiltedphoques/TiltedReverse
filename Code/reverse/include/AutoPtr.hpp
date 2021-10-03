@@ -1,40 +1,38 @@
 #pragma once
 
-#include <AutoPtrManager.hpp>
+#include <Pattern.hpp>
 
 namespace TiltedPhoques
 {
-    template<class T>
-    struct AutoPtr
+    struct BasicAutoPtr
     {
-        explicit AutoPtr(uint16_t aId) noexcept;
-        ~AutoPtr() = default;
+        explicit BasicAutoPtr(Pattern aPattern) noexcept;
+        explicit BasicAutoPtr(uintptr_t aAddress) noexcept;
 
-        AutoPtr() = delete;
-        AutoPtr(const AutoPtr&) = default;
-        AutoPtr(AutoPtr&&) = default;
-        AutoPtr& operator=(const AutoPtr&) = default;
-        AutoPtr& operator=(AutoPtr&&) = default;
+        BasicAutoPtr() = delete;
+        BasicAutoPtr(BasicAutoPtr&) = delete;
+        BasicAutoPtr& operator=(BasicAutoPtr&) = delete;
 
-        operator T* () const noexcept { return Get(); }
-        T* operator->() const noexcept { return Get(); }
-        T* Get() const noexcept;
+        [[nodiscard]] void* GetPtr() const noexcept;
 
     private:
 
-        uint16_t m_id;
+        void* m_pPtr;
     };
 
-    template <class T>
-    AutoPtr<T>::AutoPtr(uint16_t aId) noexcept
-        : m_id(aId)
+    template<class T>
+    struct AutoPtr : BasicAutoPtr
     {
-        assert(aId <= AutoPtrManager::kMaxId);
-    }
+        explicit AutoPtr(Pattern aPattren) noexcept : BasicAutoPtr(std::move(aPattren)) {}
+        explicit AutoPtr(const uintptr_t aAddress) noexcept : BasicAutoPtr(aAddress) {}
 
-    template <class T>
-    T* AutoPtr<T>::Get() const noexcept
-    {
-        return reinterpret_cast<T*>(AutoPtrManager::GetInstance().GetById(m_id));
-    }
+        AutoPtr() = delete;
+        AutoPtr(AutoPtr&) = delete;
+        AutoPtr& operator=(AutoPtr&) = delete;
+
+        operator T* () const noexcept { return Get(); }
+        T* operator->() const noexcept { return Get(); }
+
+        T* Get() const noexcept { return static_cast<T*>(GetPtr()); }
+    };
 }

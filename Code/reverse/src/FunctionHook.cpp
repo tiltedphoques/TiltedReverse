@@ -1,9 +1,9 @@
-#include <windows.h>
+
 #include <MinHook.h>
 
 #include <FunctionHook.hpp>
 #include <TiltedCore/StackAllocator.hpp>
-#include <ProcessMemory.hpp>
+#include <Memory.hpp>
 
 #define RtlOffsetToPointer(Base, Offset) ((PCHAR)(((PCHAR)(Base)) + ((ULONG_PTR)(Offset))))
 
@@ -86,7 +86,7 @@ namespace TiltedPhoques
 
         for (auto& iatHook : m_iatHooks)
         {
-            const ProcessMemory thunkMemory(iatHook.pThunk, sizeof(iatHook.pThunk));
+            const vp::ScopedContext thunkMemory(iatHook.pThunk, sizeof(iatHook.pThunk));
             thunkMemory.Write(iatHook.pOriginal);
         }
     }
@@ -109,7 +109,7 @@ namespace TiltedPhoques
 
         const auto pRealFunction = *pRealFunctionThunk;
 
-        const ProcessMemory thunkMemory(pRealFunctionThunk, sizeof(void*));
+        const vp::ScopedContext thunkMemory(pRealFunctionThunk, sizeof(void*));
         thunkMemory.Write(apFunctionDetour);
 
         m_iatHooks.emplace_back(IATHook{ pRealFunctionThunk, pRealFunction });

@@ -1,4 +1,6 @@
 #include <App.hpp>
+#include <Memory.hpp>
+#include <TiltedCore/Initializer.hpp>
 
 namespace TiltedPhoques
 {
