@@ -6,7 +6,7 @@
 #include <mem/mem.h>
 #include <mem/module.h>
 
-#include <MemoryVP.h>
+#include <MemoryVP.hpp>
 
 namespace TiltedPhoques
 {
