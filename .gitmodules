@@ -1,3 +1,6 @@
 [submodule "Libraries/TiltedCore"]
 	path = Libraries/TiltedCore
 	url = https://github.com/tiltedphoques/TiltedCore
+[submodule "external/xbyak"]
+	path = external/xbyak
+	url = https://github.com/herumi/xbyak

@@ -20,7 +20,8 @@ namespace TiltedPhoques
     {
         if (AllocConsole())
         {
-            FILE* file = freopen("CONOUT$", "w", stdout);
+            FILE* file = nullptr;
+            freopen_s(&file, "CONOUT$", "w", stdout);
             assert(file != nullptr);
             SetConsoleTitleA("Tilted Reverse Console");
             SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED);

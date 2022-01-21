@@ -23,7 +23,10 @@ end
 target("TiltedReverse")
     set_kind("static")
     set_group("Libraries")
-    add_includedirs("Code/reverse/include/", {public = true})
+    add_includedirs(
+        "Code/reverse/include/",
+        "external/xbyak", 
+        {public = true})
     add_files("Code/reverse/src/*.cpp")
     add_headerfiles(
         "Code/reverse/include/*.hpp",

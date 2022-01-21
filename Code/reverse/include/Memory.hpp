@@ -64,7 +64,7 @@ namespace TiltedPhoques
         return aEa <= UINT_MAX;
     }
 
-    MEM_STRONG_INLINE void TuneBase(mem::pointer &arAddress)
+    MEM_STRONG_INLINE void TuneBase(mem::pointer& arAddress)
     {
         arAddress.add(detail::currentBase.as<size_t>());
     }
@@ -74,7 +74,7 @@ namespace TiltedPhoques
     {
         if (IsVAOnly(aEa)) TuneBase(aEa);
 
-        if constexpr(std::is_pod_v<T> && sizeof(T) < sizeof(uintptr_t))
+        if constexpr (std::is_pod_v<T> && sizeof(T) < sizeof(uintptr_t))
             // directly set value if it fits within one register
             *reinterpret_cast<T*>(aEa.as<uintptr_t>()) = acVal;
         else
@@ -89,7 +89,7 @@ namespace TiltedPhoques
 
     // jump function
     template<typename T>
-    MEM_STRONG_INLINE constexpr void Jump(const mem::pointer aEa, const T& aFunc) noexcept
+    MEM_STRONG_INLINE constexpr void Jump(mem::pointer aEa, const T& aFunc) noexcept
     {
         if (IsVAOnly(aEa)) TuneBase(aEa);
         Put<uint8_t>(aEa, 0xE9);
@@ -98,10 +98,35 @@ namespace TiltedPhoques
 
     // jump class member function
     template<typename T>
-    MEM_STRONG_INLINE constexpr void JumpCMF(const mem::pointer aEa, const T& aFunc) noexcept
+    MEM_STRONG_INLINE constexpr void JumpCMF(mem::pointer aEa, const T& aFunc) noexcept
     {
         if (IsVAOnly(aEa)) TuneBase(aEa);
         Jump(aEa, detail::PunType<const void*>(aFunc));
+    }
+
+    template <typename T>
+    MEM_STRONG_INLINE T GetCall(mem::pointer aEa)
+    {
+        if (IsVAOnly(aEa)) TuneBase(aEa);
+
+        // call length
+        uintptr_t target = aEa.as<uintptr_t>() + 5;
+        target += *reinterpret_cast<int32_t*>(aEa.as<uintptr_t>() + 1);
+
+        return reinterpret_cast<T>(target);
+    }
+
+    template <typename TFunc>
+    MEM_STRONG_INLINE void SwapCall(mem::pointer aEa, TFunc& old_fn, const TFunc& new_fn)
+    {
+        if (IsVAOnly(aEa)) TuneBase(aEa);
+
+        old_fn = GetCall<TFunc>(aEa);
+        // put new call VA
+        int32_t disp = static_cast<int32_t>(reinterpret_cast<uintptr_t>(*new_fn) - aEa.as<uintptr_t>() - 5);
+
+        Put<uint8_t>(aEa, 0xE8);
+        Put<int32_t>(aEa.as<uintptr_t>() + 1, disp);
     }
 
     // Support code for reflection - don't use
