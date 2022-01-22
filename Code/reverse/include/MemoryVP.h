@@ -29,14 +29,14 @@ namespace TiltedPhoques::vp
         mem::pointer m_ea;
     };
 
-    void Nop(const mem::pointer acAddress, size_t aLength) noexcept
+    inline void Nop(mem::pointer acAddress, size_t aLength) noexcept
     {
         const ScopedContext ctx(acAddress, aLength);
         std::memset(acAddress.as<void*>(), 0x90, aLength);
     }
 
     template<typename T>
-    bool Put(const mem::pointer aEa, const T acVal, const size_t acOffset = 0) noexcept
+    inline bool Put(mem::pointer aEa, const T acVal, const size_t acOffset = 0) noexcept
     {
         // https://github.com/0x1F9F1/Open1560/blob/ff7a5695f038867605345d933cb3e2cd6e9623b0/code/midtown/core/hooking.cpp
         mem::protect({ aEa, sizeof(T) }).copy(acVal);
