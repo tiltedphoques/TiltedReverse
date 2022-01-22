@@ -16,5 +16,9 @@ namespace TiltedPhoques
 
         CodeGenerator(const size_t aAllocSize = kDefaultAllocStubsize) :
             Xbyak::CodeGenerator(aAllocSize, REVERSE_ALLOC_STUB(aAllocSize)){}
+
+        void jmp_S(const mem::pointer acEa) {
+            Xbyak::CodeGenerator::jmp(acEa.as<const void*>());
+        }
     };
 }

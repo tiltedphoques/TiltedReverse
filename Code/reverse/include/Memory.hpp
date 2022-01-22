@@ -6,7 +6,7 @@
 #include <mem/mem.h>
 #include <mem/module.h>
 
-#include <MemoryVP.h>
+#include <MemoryVP.hpp>
 
 namespace TiltedPhoques
 {
@@ -114,6 +114,17 @@ namespace TiltedPhoques
         target += *reinterpret_cast<int32_t*>(aEa.as<uintptr_t>() + 1);
 
         return reinterpret_cast<T>(target);
+    }
+
+    template <typename TFunc>
+    MEM_STRONG_INLINE void PutCall(mem::pointer aEa, const TFunc& new_fn)
+    {
+        if (IsVAOnly(aEa)) TuneBase(aEa);
+        // put new call VA
+        int32_t disp = static_cast<int32_t>(reinterpret_cast<uintptr_t>(*new_fn) - aEa.as<uintptr_t>() - 5);
+
+        Put<uint8_t>(aEa, 0xE8);
+        Put<int32_t>(aEa.as<uintptr_t>() + 1, disp);
     }
 
     template <typename TFunc>
