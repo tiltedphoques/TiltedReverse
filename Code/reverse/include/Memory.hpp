@@ -74,7 +74,7 @@ namespace TiltedPhoques
     {
         if (IsVAOnly(aEa)) TuneBase(aEa);
 
-        if constexpr (std::is_pod_v<T> && sizeof(T) < sizeof(uintptr_t))
+        if constexpr (std::is_trivially_copyable_v<T> && sizeof(T) < sizeof(uintptr_t))
             // directly set value if it fits within one register
             *reinterpret_cast<T*>(aEa.as<uintptr_t>()) = acVal;
         else
