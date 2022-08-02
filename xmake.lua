@@ -7,7 +7,7 @@ add_requires(
     "tiltedcore", 
     "hopscotch-map", 
     "minhook", 
-    "catch2", 
+    "catch2 2.13.9", 
     "mem",
     "xbyak")
 
