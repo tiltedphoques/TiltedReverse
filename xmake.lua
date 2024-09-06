@@ -3,13 +3,19 @@ set_arch("x64")
 
 set_xmakever("2.6.0")
 
+-- direct dependency version pinning
 add_requires(
-    "tiltedcore", 
-    "hopscotch-map", 
-    "minhook", 
+    "tiltedcore v0.2.7", 
+    "hopscotch-map v2.3.1", 
+    "minhook v1.3.3", 
     "catch2 2.13.9", 
-    "mem",
-    "xbyak")
+    "mem 1.0.0",
+    "xbyak v7.06"
+)
+
+-- dependencies' dependencies version pinning
+add_requireconfs("*.mimalloc", { version = "2.1.7", override = true })
+add_requireconfs("*.cmake", { version = "3.30.2", override = true })
 
 add_rules("mode.debug","mode.releasedbg", "mode.release")
 add_rules("plugin.vsxmake.autoupdate")
